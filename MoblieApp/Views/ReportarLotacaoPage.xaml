@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonitorLotacaoApp.Views.ReportarLotacaoPage"
+             Title="Reportar Lotação"
+             BackgroundColor="#F5F6FA">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="25" Padding="30" VerticalOptions="Center">
+
+            <!-- Cabeçalho Informativo -->
+            <Label Text="Monitoramento Colaborativo"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="#7F8C8D"
+                   TextTransform="Uppercase"/>
+
+            <Label Text="Como está a lotação do ônibus agora?"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="#2C3E50"
+                   HorizontalTextAlignment="Center"/>
+
+            <Label Text="Selecione o nível abaixo. O sistema validará automaticamente a sua presença na rota por geolocalização."
+                   FontSize="14"
+                   HorizontalOptions="Center"
+                   TextColor="#95A5A6"
+                   HorizontalTextAlignment="Center"/>
+
+            <!-- Botões de Ação Rápida (Toque Único) -->
+            <Button Text="🟢 Vazio (Até 50%)" 
+                    BackgroundColor="#27AE60" 
+                    TextColor="White" 
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    CornerRadius="12"
+                    HeightRequest="60"
+                    Clicked="OnVazioClicked"/>
+
+            <Button Text="🟡 Moderado (50% a 80%)" 
+                    BackgroundColor="#F39C12" 
+                    TextColor="White" 
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    CornerRadius="12"
+                    HeightRequest="60"
+                    Clicked="OnModeradoClicked"/>
+
+            <Button Text="🔴 Lotado (Acima de 80%)" 
+                    BackgroundColor="#C0392B" 
+                    TextColor="White" 
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    CornerRadius="12"
+                    HeightRequest="60"
+                    Clicked="OnLotadoClicked"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

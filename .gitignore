@@ -1,0 +1,18 @@
+# Visual Studio / .NET MAUI Ignore File
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Tt]emp/
+[Tt]mp/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Pastas de saída e pacotes
+.opendb
+.vspscc
+.vssscc
+*.pidb

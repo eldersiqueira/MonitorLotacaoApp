@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonitorLotacaoApp.Views.LoginPage"
+             Title="Acesso ao Sistema"
+             BackgroundColor="#494C4E">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="30" VerticalOptions="Center">
+
+            <Label Text="Monitor de Lotação"
+                   FontSize="26"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="#2C3E50"/>
+
+            <Label Text="Faça login ou cadastre-se para continuar"
+                   FontSize="14"
+                   HorizontalOptions="Center"
+                   TextColor="#7F8C8D"
+                   Margin="0,0,0,20"/>
+
+            <!-- Campos de Entrada -->
+            <Entry x:Name="TxtNome"
+                   Placeholder="Nome completo (Apenas para cadastro)"
+                   ClearButtonVisibility="WhileEditing"
+                   HeightRequest="50"/>
+
+            <Entry x:Name="TxtEmail"
+                   Placeholder="E-mail institucional ou pessoal"
+                   Keyboard="Email"
+                   ClearButtonVisibility="WhileEditing"
+                   HeightRequest="50"/>
+
+            <Entry x:Name="TxtSenha"
+                   Placeholder="Senha de acesso (Mín. 6 caracteres)"
+                   IsPassword="True"
+                   ClearButtonVisibility="WhileEditing"
+                   HeightRequest="50"/>
+
+            <!-- Botões de Ação -->
+            <Button Text="Entrar"
+                    BackgroundColor="#2980B9"
+                    TextColor="Black"
+                    FontSize="16"
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    Clicked="OnLoginClicked"/>
+
+            <Button Text="Cadastrar Nova Conta"
+                    BackgroundColor="#27AE60"
+                    TextColor="Black"
+                    FontSize="16"
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    Clicked="OnCadastrarClicked"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
