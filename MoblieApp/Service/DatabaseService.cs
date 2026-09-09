@@ -15,9 +15,12 @@ namespace MonitorLotacaoApp.Services
             string dbPath = Path.Combine(FileSystem.AppDataDirectory, "monitor_lotacao.db3");
             _database = new SQLiteAsyncConnection(dbPath);
 
+            // Cria as tabelas da Sprint 1 e Sprint 3
             await _database.CreateTableAsync<Passageiro>();
+            await _database.CreateTableAsync<RelatoModel>();
         }
 
+        // --- Métodos para Passageiros (Sprint 1) ---
         public static async Task<int> SalvarPassageiroAsync(Passageiro passageiro)
         {
             await Init();
@@ -30,6 +33,33 @@ namespace MonitorLotacaoApp.Services
             return await _database.Table<Passageiro>()
                                   .Where(p => p.Email == email)
                                   .FirstOrDefaultAsync();
+        }
+
+        // --- Métodos para Relatos Offline (Sprint 3) ---
+        public static async Task<int> SalvarRelatoOfflineAsync(RelatoModel relato)
+        {
+            await Init();
+            relato.Horario = DateTime.Now;
+            relato.Status = "Pendente";
+            relato.Sincronizado = false;
+
+            return await _database.InsertAsync(relato);
+        }
+
+        public static async Task<List<RelatoModel>> ObterRelatosPendentesAsync()
+        {
+            await Init();
+            return await _database.Table<RelatoModel>()
+                                  .Where(r => r.Sincronizado == false)
+                                  .ToListAsync();
+        }
+
+        public static async Task AtualizarRelatoSincronizadoAsync(RelatoModel relato)
+        {
+            await Init();
+            relato.Sincronizado = true;
+            relato.Status = "Sincronizado";
+            await _database.UpdateAsync(relato);
         }
     }
 }

@@ -1,12 +1,17 @@
 ﻿using Microsoft.Maui.Devices.Sensors;
+using MonitorLotacaoApp.Services;
 
 namespace MonitorLotacaoApp.Views;
 
 public partial class ReportarLotacaoPage : ContentPage
 {
-    public ReportarLotacaoPage()
+    private readonly string _codigoLinha;
+
+    // Construtor que recebe a linha selecionada na Sprint 2 (US 2.1)
+    public ReportarLotacaoPage(string codigoLinha)
     {
         InitializeComponent();
+        _codigoLinha = codigoLinha;
     }
 
     private async void OnVazioClicked(object sender, EventArgs e)
@@ -28,25 +33,22 @@ public partial class ReportarLotacaoPage : ContentPage
     {
         try
         {
-            var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
-            var location = await Geolocation.Default.GetLocationAsync(request);
+            // Exibe indicador visual de carregamento ou processamento se necessário
+            bool gpsDisponivel = await ValidarDispositivosGPSAsync();
+            if (!gpsDisponivel) return;
 
-            if (location != null)
+            // Executa a validação de proximidade geográfica (Sprint 3)[cite: 1]
+            bool estaNoTrajeto = await GeofencingService.ValidarPresencaNoTrajetoAsync();
+
+            if (estaNoTrajeto)
             {
-                bool usuarioNoTrajeto = ValidarProximidadeTrajeto(location.Latitude, location.Longitude);
+                await DisplayAlert("Sucesso", $"Relato de nível '{nivelLotacao}' para a linha {_codigoLinha} validado e computado com sucesso!", "OK");
 
-                if (usuarioNoTrajeto)
-                {
-                    await DisplayAlert("Sucesso", $"Relato de nível '{nivelLotacao}' validado e computado com sucesso!", "OK");
-                }
-                else
-                {
-                    await DisplayAlert("Aviso de Rota", "Você está fora do trajeto monitorado desta linha de ônibus.", "OK");
-                }
+                // Próximo passo técnico: Acionar o salvamento local via SQLite (US 1.3) caso esteja offline[cite: 1]
             }
             else
             {
-                await DisplayAlert("Erro de GPS", "Não foi possível capturar a sua localização atual.", "OK");
+                await DisplayAlert("Aviso de Rota", "Você está fora do trajeto monitorado desta linha de ônibus. O relato não pôde ser aceito.", "OK");
             }
         }
         catch (FeatureNotSupportedException)
@@ -55,7 +57,7 @@ public partial class ReportarLotacaoPage : ContentPage
         }
         catch (PermissionException)
         {
-            await DisplayAlert("Permissão Negada", "É necessário autorizar o acesso à localização.", "OK");
+            await DisplayAlert("Permissão Negada", "É necessário autorizar o acesso à localização para reportar a lotação.", "OK");
         }
         catch (Exception ex)
         {
@@ -63,8 +65,20 @@ public partial class ReportarLotacaoPage : ContentPage
         }
     }
 
-    private bool ValidarProximidadeTrajeto(double latitude, double longitude)
+    private async Task<bool> ValidarDispositivosGPSAsync()
     {
+        var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+        if (status != PermissionStatus.Granted)
+        {
+            status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+        }
+
+        if (status != PermissionStatus.Granted)
+        {
+            await DisplayAlert("Permissão Negada", "O aplicativo precisa da localização para validar o relato a bordo.", "OK");
+            return false;
+        }
+
         return true;
     }
 }

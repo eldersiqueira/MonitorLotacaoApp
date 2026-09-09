@@ -34,7 +34,7 @@ public partial class SelecionarLinhaPage : ContentPage
         // Limpa a seleção visual
         CollectionLinhas.SelectedItem = null;
 
-        // Navega para a tela de Reporte de Lotação passando a linha escolhida
-        await Navigation.PushAsync(new ReportarLotacaoPage());
+        // CORREÇÃO: Passa o 'CodigoLinha' da linha escolhida para a tela de reporte
+        await Navigation.PushAsync(new ReportarLotacaoPage(linhaSelecionada.CodigoLinha));
     }
-}
+    }
