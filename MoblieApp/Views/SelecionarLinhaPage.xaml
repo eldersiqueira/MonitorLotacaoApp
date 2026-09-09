@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonitorLotacaoApp.Views.SelecionarLinhaPage"
+             Title="Selecionar Linha de Ônibus"
+             BackgroundColor="#F5F6FA">
+
+    <VerticalStackLayout Spacing="20" Padding="25">
+
+        <Label Text="Escolha a sua linha"
+               FontSize="22"
+               FontAttributes="Bold"
+               HorizontalOptions="Center"
+               TextColor="#2C3E50"/>
+
+        <Label Text="Selecione abaixo uma das 5 linhas monitoradas para prosseguir com o reporte de lotação:"
+               FontSize="14"
+               HorizontalOptions="Center"
+               HorizontalTextAlignment="Center"
+               TextColor="#7F8C8D"/>
+
+        <!-- Lista de Linhas de Ônibus (Escopo do TCC) -->
+        <CollectionView x:Name="CollectionLinhas" SelectionMode="Single" SelectionChanged="OnLinhaSelected">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="0,5" Padding="15" CornerRadius="10" BackgroundColor="White" HasShadow="True">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="{Binding NomeLinha}" FontSize="18" FontAttributes="Bold" TextColor="#2980B9"/>
+                            <Label Text="{Binding Trajeto}" FontSize="12" TextColor="#555555"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </VerticalStackLayout>
+</ContentPage>

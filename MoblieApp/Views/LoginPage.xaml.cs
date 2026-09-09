@@ -33,6 +33,9 @@ public partial class LoginPage : ContentPage
         if (passageiroCadastrado != null && passageiroCadastrado.Senha == senha)
         {
             await DisplayAlert("Sucesso", $"Bem-vindo de volta, {passageiroCadastrado.Nome}!", "OK");
+
+            // CORREÇÃO: Realiza a navegação para a tela de seleção de linhas da Sprint 2
+            await Navigation.PushAsync(new SelecionarLinhaPage());
         }
         else
         {

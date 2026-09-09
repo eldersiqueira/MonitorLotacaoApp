@@ -6,6 +6,7 @@ public partial class App : Application
     {
         InitializeComponent();
 
-        MainPage = new Views.LoginPage();
+        // Envolve a LoginPage em uma NavigationPage para permitir transições de tela
+        MainPage = new NavigationPage(new Views.LoginPage());
     }
 }
