@@ -1,15 +1,24 @@
-﻿namespace MonitorLotacaoApp;
-
-public partial class MainPage : ContentPage
+﻿namespace MonitorLotacaoApp
 {
-    public MainPage()
+    public partial class MainPage : ContentPage
     {
-        InitializeComponent();
-    }
+        int count = 0;
 
-    private async void OnIrParaLoginAdminClicked(object sender, EventArgs e)
-    {
-        // Navega para a página de login dedicada à gestão (Sprint 5)
-        await Navigation.PushAsync(new Views.LoginPage());
+        public MainPage()
+        {
+            InitializeComponent();
+        }
+
+        private void OnCounterClicked(object? sender, EventArgs e)
+        {
+            count++;
+
+            if (count == 1)
+                CounterBtn.Text = $"Clicked {count} time";
+            else
+                CounterBtn.Text = $"Clicked {count} times";
+
+            SemanticScreenReader.Announce(CounterBtn.Text);
+        }
     }
 }
