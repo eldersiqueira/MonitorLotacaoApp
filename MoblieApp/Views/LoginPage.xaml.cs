@@ -96,6 +96,7 @@ public partial class LoginPage : ContentPage
         }
     }
 
+
     private bool ValidarFormatoEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
