@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonitorLotacaoApp.Views.RelatoriosPage"
+             Title="Relatórios de Eficiência"
+             BackgroundColor="#F4F6F9">
+
+    <Grid RowDefinitions="Auto, *" RowSpacing="12" Padding="16">
+
+        <!-- Cabeçalho Informativo -->
+        <VerticalStackLayout Grid.Row="0" Spacing="4">
+            <Label Text="Análise de Ocupação da Frota"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="#2C3E50" />
+            <Label Text="Indicadores consolidados para apoio à tomada de decisão operacional."
+                   FontSize="13"
+                   TextColor="#7F8C8D" />
+        </VerticalStackLayout>
+
+        <!-- Lista de Relatórios com Cartões Modernos -->
+        <CollectionView x:Name="CollectionRelatorio"
+                        Grid.Row="1"
+                        SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="0,6"
+                           Padding="16"
+                           CornerRadius="12"
+                           HasShadow="True"
+                           BackgroundColor="White"
+                           BorderColor="#E1E8ED">
+
+                        <VerticalStackLayout Spacing="8">
+                            <!-- Primeira Linha: Linha, Horário e Badge -->
+                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                <HorizontalStackLayout Grid.Column="0" Spacing="6" VerticalOptions="Center">
+                                    <Label Text="{Binding CodigoLinha, StringFormat='Linha {0}'}" 
+                                           FontAttributes="Bold" 
+                                           FontSize="16" 
+                                           TextColor="#2C3E50" />
+                                    <Label Text="•" 
+                                           TextColor="#BDC3C7" 
+                                           FontSize="16" />
+                                    <Label Text="{Binding FaixaHoraria}" 
+                                           FontSize="14" 
+                                           TextColor="#7F8C8D" 
+                                           VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+
+                                <Border Grid.Column="1"
+                                        StrokeShape="RoundRectangle 8"
+                                        BackgroundColor="#FDEDEC"
+                                        Stroke="#F5B7B1"
+                                        Padding="10,4"
+                                        HorizontalOptions="End">
+                                    <Label Text="{Binding NivelLotacao}"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="#C0392B" />
+                                </Border>
+                            </Grid>
+
+                            <!-- Rodapé do Cartão -->
+                            <Label Text="{Binding TotalOcorrencias, StringFormat='Total de registos colaborativos: {0}'}"
+                                   FontSize="12"
+                                   TextColor="#95A5A6" />
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+</ContentPage>

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Maui.Devices.Sensors;
-using MonitorLotacaoApp.Services;
 
 namespace MonitorLotacaoApp.Views;
 
@@ -7,78 +6,68 @@ public partial class ReportarLotacaoPage : ContentPage
 {
     private readonly string _codigoLinha;
 
-    // Construtor que recebe a linha selecionada na Sprint 2 (US 2.1)
+    // Mude para 'false' apenas quando for testar com GPS real na rua (Sprint 3)[cite: 2]
+    private const bool MODO_SIMULACAO_GPS = true;
+
     public ReportarLotacaoPage(string codigoLinha)
     {
         InitializeComponent();
         _codigoLinha = codigoLinha;
+        Title = $"Reportar Linha {_codigoLinha}";
     }
 
-    private async void OnVazioClicked(object sender, EventArgs e)
-    {
-        await ProcessarRelatorioAsync("Vazio");
-    }
+    private async void OnVazioClicked(object sender, EventArgs e) => await ProcessarEnvioRelato("Vazio");
+    private async void OnModeradoClicked(object sender, EventArgs e) => await ProcessarEnvioRelato("Moderado");
+    private async void OnLotadoClicked(object sender, EventArgs e) => await ProcessarEnvioRelato("Lotado");
 
-    private async void OnModeradoClicked(object sender, EventArgs e)
+    private async Task ProcessarEnvioRelato(string nivelLotacao)
     {
-        await ProcessarRelatorioAsync("Moderado");
-    }
+        Location localizacaoFinal = null;
 
-    private async void OnLotadoClicked(object sender, EventArgs e)
-    {
-        await ProcessarRelatorioAsync("Lotado");
-    }
-
-    private async Task ProcessarRelatorioAsync(string nivelLotacao)
-    {
-        try
+        if (MODO_SIMULACAO_GPS)
         {
-            // Exibe indicador visual de carregamento ou processamento se necessário
-            bool gpsDisponivel = await ValidarDispositivosGPSAsync();
-            if (!gpsDisponivel) return;
-
-            // Executa a validação de proximidade geográfica (Sprint 3)[cite: 1]
-            bool estaNoTrajeto = await GeofencingService.ValidarPresencaNoTrajetoAsync();
-
-            if (estaNoTrajeto)
+            // Simula uma coordenada válida para testes locais sem hardware de GPS
+            localizacaoFinal = new Location(-23.550520, -46.633308);
+            System.Diagnostics.Debug.WriteLine("Modo de Simulação GPS ativo para testes.");
+        }
+        else
+        {
+            try
             {
-                await DisplayAlert("Sucesso", $"Relato de nível '{nivelLotacao}' para a linha {_codigoLinha} validado e computado com sucesso!", "OK");
+                var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+                if (status != PermissionStatus.Granted)
+                {
+                    status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+                }
 
-                // Próximo passo técnico: Acionar o salvamento local via SQLite (US 1.3) caso esteja offline[cite: 1]
+                if (status != PermissionStatus.Granted)
+                {
+                    await DisplayAlert("Permissão Negada", "A geolocalização é necessária para validar o trajeto[cite: 2].", "OK");
+                    return;
+                }
+
+                var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
+                localizacaoFinal = await Geolocation.GetLocationAsync(request);
             }
-            else
+            catch (Exception ex)
             {
-                await DisplayAlert("Aviso de Rota", "Você está fora do trajeto monitorado desta linha de ônibus. O relato não pôde ser aceito.", "OK");
+                await DisplayAlert("Erro", $"Falha ao obter GPS: {ex.Message}", "OK");
+                return;
             }
         }
-        catch (FeatureNotSupportedException)
-        {
-            await DisplayAlert("Compatibilidade", "A geolocalização não é suportada neste dispositivo.", "OK");
-        }
-        catch (PermissionException)
-        {
-            await DisplayAlert("Permissão Negada", "É necessário autorizar o acesso à localização para reportar a lotação.", "OK");
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Erro Inesperado", $"Ocorreu uma falha técnica: {ex.Message}", "OK");
-        }
-    }
 
-    private async Task<bool> ValidarDispositivosGPSAsync()
-    {
-        var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
-        if (status != PermissionStatus.Granted)
+        if (localizacaoFinal != null)
         {
-            status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
-        }
+            // Adiciona pontos de gamificação (US 5.2)[cite: 2]
+            int pontos = Preferences.Get("PontosUsuario", 0) + 10;
+            Preferences.Set("PontosUsuario", pontos);
 
-        if (status != PermissionStatus.Granted)
+            await DisplayAlert("Sucesso", $"Relato '{nivelLotacao}' enviado para a linha {_codigoLinha}!\nPontuação atual: {pontos} pts.", "OK");
+            await Navigation.PopAsync();
+        }
+        else
         {
-            await DisplayAlert("Permissão Negada", "O aplicativo precisa da localização para validar o relato a bordo.", "OK");
-            return false;
+            await DisplayAlert("Aviso", "Não foi possível validar a localização.", "OK");
         }
-
-        return true;
     }
 }
