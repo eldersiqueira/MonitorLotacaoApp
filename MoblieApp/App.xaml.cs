@@ -1,12 +1,19 @@
-﻿namespace MonitorLotacaoApp;
+﻿using MonitorLotacao.Helpers;
+using MonitorLotacaoApp.Views;
 
-public partial class App : Application
+namespace MonitorLotacaoApp
 {
-    public App()
+    public partial class App : Application
     {
-        InitializeComponent();
+        public App()
+        {
+            InitializeComponent();
 
-        // Envolve a LoginPage em uma NavigationPage para permitir transições de tela
-        MainPage = new NavigationPage(new Views.LoginPage());
+            // Define o AppShell como a espinha dorsal visual e de navegação do app
+            MainPage = new AppShell();
+
+            // Retiramos a chamada CheckUserSessionAndNavigate() daqui, pois
+            // o direcionamento inicial agora será responsabilidade da tela de Login.
+        }
     }
 }

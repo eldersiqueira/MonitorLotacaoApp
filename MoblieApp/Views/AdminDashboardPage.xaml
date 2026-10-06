@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonitorLotacaoApp.Views.AdminDashboardPage">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <!-- Cabeçalho do Administrador (Alinhado ao Escopo do TCC) -->
+            <Label Text="Painel do Administrador (Gestão de Frota)"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center" />
+
+            <Label Text="Aqui serão exibidos os indicadores de eficiência, horários críticos e exportação de relatórios gerenciais."
+                   FontSize="14"
+                   TextColor="Gray"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center" />
+
+            <!-- Botão para voltar ao perfil de Passageiro (para testes) -->
+            <Button Text="🔄 Alternar para Perfil de Passageiro (Teste)"
+                    BackgroundColor="#7F8C8D"
+                    TextColor="White"
+                    Clicked="OnSwitchToPassageiroClicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
+

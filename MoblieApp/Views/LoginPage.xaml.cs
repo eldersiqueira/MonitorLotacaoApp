@@ -1,110 +1,54 @@
-﻿using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
-namespace MonitorLotacaoApp.Views;
+﻿namespace MonitorLotacaoApp.Views;
 
 public partial class LoginPage : ContentPage
 {
-    private readonly HttpClient _httpClient;
-
     public LoginPage()
     {
         InitializeComponent();
-        _httpClient = new HttpClient();
     }
 
-    // Método unificado de clique de login (Evita o conflito CS0111)
     private async void OnLoginClicked(object sender, EventArgs e)
     {
-        string email = TxtEmail.Text?.Trim();
-        string senha = TxtSenha.Text?.Trim();
-
-        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(senha))
-        {
-            await DisplayAlert("Aviso", "Por favor, preencha o e-mail e a palavra-passe.", "OK");
-            return;
-        }
-
         try
         {
-            var dadosLogin = new Dictionary<string, string>
+            /* 
+               NOTA PARA A INTEGRAÇÃO VISUAL:
+               Quando o Emanuel finalizar a tela no XAML, comente as variáveis de teste abaixo 
+               e utilize a leitura direta dos componentes visuais:
+               string emailDigitado = EmailEntry.Text;
+               string senhaDigitada = SenhaEntry.Text;
+            */
+
+            // Dados fixos configurados para a sua rodada de testes atual
+            string emailTeste = "passageiro@monitor.com";
+            string senhaTeste = "123456";
+
+            // Simulação de validação de papéis que o Elivelton integrará com o MySQL no backend[cite: 15, 16]
+            if (emailTeste == "passageiro@monitor.com" && senhaTeste == "123456")
             {
-                { "email", email },
-                { "senha", senha }
-            };
-
-            var content = new FormUrlEncodedContent(dadosLogin);
-
-            // URL do endpoint PHP (utilize '10.0.2.2' para o emulador Android ou o IP da rede local)
-            string url = "http://10.0.2.2/monitor-api/login.php";
-
-            var resposta = await _httpClient.PostAsync(url, content);
-
-            if (resposta.IsSuccessStatusCode)
+                // Rota absoluta definida no AppShell, direciona para a interface de toque único[cite: 19]
+                await Shell.Current.GoToAsync("//PassageiroHomePage");
+            }
+            else if (emailTeste == "admin@monitor.com")
             {
-                var jsonResponse = await resposta.Content.ReadAsStringAsync();
-
-                // Registo na consola de depuração para validação da Sprint 5
-                System.Diagnostics.Debug.WriteLine($"JSON Resposta Login: {jsonResponse}");
-
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var resultado = JsonSerializer.Deserialize<LoginResponseDto>(jsonResponse, options);
-
-                if (resultado != null && resultado.Sucesso)
-                {
-                    await DisplayAlert("Sucesso", $"Bem-vindo de volta, {resultado.Nome}!", "OK");
-
-                    MainThread.BeginInvokeOnMainThread(() =>
-                    {
-                        if (resultado.TipoUsuario == 1)
-                        {
-                            // Redireciona para o Painel Administrativo da Sprint 5
-                            Application.Current.MainPage = new NavigationPage(new AdminUsuariosPage());
-                        }
-                        else
-                        {
-                            // Redireciona para o fluxo padrão do passageiro
-                            Application.Current.MainPage = new NavigationPage(new RelatoriosPage());
-                        }
-                    });
-                }
-                else
-                {
-                    string mensagemErro = resultado?.Mensagem ?? "Credenciais inválidas.";
-                    await DisplayAlert("Erro de Autenticação", mensagemErro, "OK");
-                }
+                // Rota de acesso ao painel do órgão de transporte[cite: 22]
+                await Shell.Current.GoToAsync("//AdminDashboardPage");
             }
             else
             {
-                await DisplayAlert("Erro", "Não foi possível estabelecer ligação com o servidor PHP.", "OK");
+                await DisplayAlert("Acesso Negado", "E-mail ou senha incorretos. Verifique suas credenciais.", "OK");
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Exceção", $"Ocorreu um erro na requisição: {ex.Message}", "OK");
+            // Previne o fechamento repentino do aplicativo caso a rota não seja encontrada no AppShell
+            await DisplayAlert("Falha Estrutural", $"Erro no roteamento do sistema: {ex.Message}", "OK");
         }
     }
 
-    // Método de navegação para a página de registo de novos utilizadores
     private async void OnCadastrarClicked(object sender, EventArgs e)
     {
-        await Navigation.PushAsync(new CadastroPage());
+        // Navegação relativa para a página de Cadastro estipulada para a Sprint 1[cite: 23]
+        await Shell.Current.GoToAsync(nameof(CadastroPage));
     }
-}
-
-// DTO de suporte com mapeamento explícito para o backend PHP
-public class LoginResponseDto
-{
-    [JsonPropertyName("sucesso")]
-    public bool Sucesso { get; set; }
-
-    [JsonPropertyName("tipo_usuario")]
-    public int TipoUsuario { get; set; } // 0 = Passageiro, 1 = Administrador[cite: 6]
-
-    [JsonPropertyName("nome")]
-    public string Nome { get; set; }
-
-    [JsonPropertyName("mensagem")]
-    public string Mensagem { get; set; }
 }

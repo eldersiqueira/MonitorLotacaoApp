@@ -3,12 +3,28 @@
     x:Class="MonitorLotacaoApp.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:MonitorLotacaoApp"
-    Title="MonitorLotacaoApp">
+    xmlns:views="clr-namespace:MonitorLotacaoApp.Views"
+    Title="Monitor de Lotação">
 
+    <!-- Tela Inicial de Login -->
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        Title="Login"
+        ContentTemplate="{DataTemplate views:LoginPage}"
+        Route="LoginPage" />
+
+    <!-- Rota do Passageiro (US 1.1 - Interface Simplificada) -->
+    <!-- O atributo FlyoutItemIsVisible="False" esconde a página do menu lateral -->
+    <ShellContent
+        Title="Painel do Passageiro"
+        ContentTemplate="{DataTemplate views:PassageiroHomePage}"
+        Route="PassageiroHomePage"
+        FlyoutItemIsVisible="False" />
+
+    <!-- Rota do Administrador (Painel de Gestão) -->
+    <ShellContent
+        Title="Painel de Gestão"
+        ContentTemplate="{DataTemplate views:AdminDashboardPage}"
+        Route="AdminDashboardPage"
+        FlyoutItemIsVisible="False" />
 
 </Shell>
