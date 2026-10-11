@@ -26,7 +26,7 @@ namespace MonitorLotacaoApp.Services
                 foreach (var relato in relatosPendentes)
                 {
                     // Envia o relato via requisição POST para o endpoint da API backend
-                    HttpResponseMessage resposta = await _httpClient.PostAsJsonAsync("relatos/sincronizar", relato);
+                    HttpResponseMessage resposta = await _httpClient.PostAsJsonAsync("sincronizar.php", relato);
 
                     if (resposta.IsSuccessStatusCode)
                     {

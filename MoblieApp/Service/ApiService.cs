@@ -1,41 +1,53 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System;
 
 namespace MonitorLotacaoApp.Services
 {
+    // 1. Classe DTO (Data Transfer Object) para espelhar o retorno JSON do seu PHP
+    public class LoginResponse
+    {
+        public bool sucesso { get; set; }
+        public string mensagem { get; set; }
+        public int? tipo_usuario { get; set; }
+        public string nome { get; set; }
+    }
+
     public class ApiService
     {
         private readonly HttpClient _httpClient;
 
-        // Coloque aqui o IP do seu servidor local (XAMPP/Tomcat) ou domínio real
-        // Exemplo para emulador Android acessando localhost: "http://10.0.2.2/api/"
-        private const string BaseUrl = "http://SEU_IP_OU_DOMINIO/api/";
+        // Se estiver testando no Emulador Android via XAMPP local, o IP padrão é 10.0.2.2
+        // Troque o caminho /api_tcc_onibus/ para o nome exato da pasta no seu htdocs
+        private const string BaseUrl = "http://10.0.2.2/monitor-api/";
 
         public ApiService()
         {
             _httpClient = new HttpClient();
         }
 
-        // Método real para autenticar conectando no banco central MySQL
         public async Task<string> RealizarLoginRealAsync(string email, string senha)
         {
             try
             {
-                // Monta os dados para enviar ao servidor (Java/PHP)
-                var dadosLogin = new { email = email, senha = senha };
-                string jsonEnvio = JsonSerializer.Serialize(dadosLogin);
-                var conteudo = new StringContent(jsonEnvio, Encoding.UTF8, "application/json");
+                // Alterado para enviar os dados de forma compatível com o $_POST do PHP
+                var parametros = new Dictionary<string, string>
+        {
+            { "email", email },
+            { "senha", senha }
+        };
+                var conteudo = new FormUrlEncodedContent(parametros);
 
-                // Faz a chamada na API
                 var resposta = await _httpClient.PostAsync($"{BaseUrl}login.php", conteudo);
 
                 if (resposta.IsSuccessStatusCode)
                 {
-                    // Lê a resposta do servidor (ex: "Passageiro", "Administrador" ou "Erro")
-                    string perfilRetornado = await resposta.Content.ReadAsStringAsync();
-                    return perfilRetornado;
+                    // O PHP retorna um JSON, por exemplo: {"sucesso":true, "tipo_usuario":0, "nome":"Utilizador"}
+                    string retornoJson = await resposta.Content.ReadAsStringAsync();
+                    return retornoJson;
                 }
-
                 return "ErroDeConexao";
             }
             catch (Exception ex)
