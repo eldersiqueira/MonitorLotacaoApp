@@ -20,9 +20,7 @@
                TextColor="#7F8C8D"/>
 
         <!-- Lista de Linhas de Ônibus (Escopo do TCC) -->
-        <CollectionView x:Name="CollectionLinhas"
-                SelectionMode="Single"
-                SelectionChanged="OnLinhaSelected">
+        <CollectionView x:Name="CollectionLinhas" SelectionMode="Single" SelectionChanged="OnLinhaSelected">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Frame Margin="0,5" Padding="15" CornerRadius="10" BackgroundColor="White" HasShadow="True">
