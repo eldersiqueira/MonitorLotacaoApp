@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonitorLotacaoApp.Views.RedefinirSenhaPage"
+             Title="Recuperação de Senha"
+             BackgroundColor="#F5F5F5">
+
+    <VerticalStackLayout Spacing="20" Padding="30" VerticalOptions="Center">
+
+        <Label Text="Redefinir Senha" 
+               FontSize="24" 
+               FontAttributes="Bold" 
+               HorizontalOptions="Center" 
+               TextColor="#1e81b0" />
+
+        <Entry Placeholder="Digite seu e-mail cadastrado" 
+               Keyboard="Email" 
+               BackgroundColor="White"
+               ClearButtonVisibility="WhileEditing"/>
+
+        <Button Text="Enviar Instruções" 
+                BackgroundColor="#1e81b0" 
+                TextColor="White" 
+                CornerRadius="8"
+                HeightRequest="50"/>
+
+    </VerticalStackLayout>
+</ContentPage>

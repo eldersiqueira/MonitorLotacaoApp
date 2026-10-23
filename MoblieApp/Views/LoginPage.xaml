@@ -20,21 +20,18 @@
                    TextColor="#1e81b0" 
                    Margin="0,0,0,20" />
 
-            <Entry x:Name="EmailEntry"
-                   Text="{Binding Email}"
+            <Entry Text="{Binding Email}"
                    Placeholder="Digite seu E-mail" 
                    Keyboard="Email" 
                    BackgroundColor="White"
                    ClearButtonVisibility="WhileEditing"/>
 
-            <Entry x:Name="SenhaEntry"
-                   Text="{Binding Senha}"
+            <Entry Text="{Binding Senha}"
                    Placeholder="Digite sua Senha" 
                    IsPassword="True" 
                    BackgroundColor="White"
                    ClearButtonVisibility="WhileEditing"/>
 
-            <!-- Agora ele olha direto para a propriedade TemErro no C# -->
             <Label Text="{Binding MensagemErro}" 
                    TextColor="Red" 
                    HorizontalOptions="Center" 
@@ -45,7 +42,6 @@
                                Color="#1e81b0" 
                                HorizontalOptions="Center" />
 
-            <!-- O botão desativa automaticamente usando o IsNotBusy -->
             <Button Text="Entrar" 
                     Command="{Binding RealizarLoginCommand}" 
                     BackgroundColor="#1e81b0" 
@@ -53,13 +49,6 @@
                     CornerRadius="8"
                     HeightRequest="50"
                     IsEnabled="{Binding IsNotBusy}" />
-
-            <Button Text="Esqueci minha senha" 
-                    Command="{Binding IrParaRedefinirSenhaCommand}" 
-                    BackgroundColor="Transparent" 
-                    TextColor="#1e81b0" 
-                    FontAttributes="Bold" 
-                    Margin="0,10,0,0"/>
 
         </VerticalStackLayout>
     </ScrollView>

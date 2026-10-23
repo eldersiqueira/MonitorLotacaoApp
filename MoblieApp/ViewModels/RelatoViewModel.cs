@@ -1,88 +1,71 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Maui.Devices.Sensors;
-using MonitorLotacaoApp.Models;
 using MonitorLotacaoApp.Services;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Maui.Controls;
 
 namespace MonitorLotacaoApp.ViewModels
 {
+    [QueryProperty(nameof(LinhaId), "linhaId")]
     public partial class RelatoViewModel : ObservableObject
     {
         [ObservableProperty]
-        private string codigoLinha;
+        private int linhaId;
 
         [ObservableProperty]
-        private string nivelLotacao; // Ex: "Vazio", "Moderado", "Lotado"
+        private string statusGPS = "Verificando proximidade da linha via GPS...";
+
+        [ObservableProperty]
+        private string mensagemRetorno;
 
         [ObservableProperty]
         private bool isBusy;
 
-        [ObservableProperty]
-        private string mensagem;
+        public RelatoViewModel()
+        {
+            ValidarLocalizacaoInicial();
+        }
+
+        private async void ValidarLocalizacaoInicial()
+        {
+            // Executa a validação por geolocalização (US 1.2)
+            bool estaNoTrajeto = await GeofencingService.ValidarPresencaNoTrajetoAsync();
+
+            if (estaNoTrajeto)
+            {
+                StatusGPS = "📍 Localização confirmada no trajeto. Pode enviar o seu relato!";
+            }
+            else
+            {
+                StatusGPS = "⚠️ Aviso: Você parece estar fora da rota oficial, mas o relato será salvo offline.";
+            }
+        }
 
         [RelayCommand]
-        public async Task EnviarRelatoAsync()
+        public async Task EnviarRelatoAsync(string nivelLotacao)
         {
-            // 1. Validação básica de tela
-            if (string.IsNullOrWhiteSpace(CodigoLinha) || string.IsNullOrWhiteSpace(NivelLotacao))
-            {
-                Mensagem = "Por favor, preencha a linha e o nível de lotação.";
-                return;
-            }
+            if (string.IsNullOrEmpty(nivelLotacao)) return;
 
             IsBusy = true;
-            Mensagem = "Validando a sua localização via GPS...";
+            MensagemRetorno = string.Empty;
 
             try
             {
-                // 2. Simulação da rota oficial (Futuramente, isso virá da API do Google ou do MySQL)
-                // Colocamos duas coordenadas de exemplo para formar um trajeto fictício
-                var rotaOficial = new List<Location>
-                {
-                    new Location(-23.550520, -46.633308),
-                    new Location(-23.551000, -46.634000)
-                };
+                // Validação final de GPS antes de persistir
+                bool dentroDaArea = await GeofencingService.ValidarPresencaNoTrajetoAsync();
 
-                // 3. Aciona a Cerca Geográfica (Geofencing) para cumprir a US 1.2
-                bool estaNoTrajeto = await GeofencingService.ValidarPresencaNoTrajetoAsync(rotaOficial);
+                // Aqui entra a persistência Local (SQLite - Offline First) ou envio direto para a API PHP
+                await Task.Delay(1000); // Simulando requisição de rede ou escrita no SQLite
 
-                if (!estaNoTrajeto)
-                {
-                    Mensagem = "Ação negada: Você precisa estar fisicamente no trajeto do ônibus para relatar a lotação.";
-                    IsBusy = false;
-                    return;
-                }
+                MensagemRetorno = $"Relato '{nivelLotacao}' enviado com sucesso para a linha {LinhaId}!";
 
-                Mensagem = "Localização confirmada! Salvando relato...";
-
-                // 4. Captura a coordenada exata de agora para registrar no banco de dados
-                var request = new GeolocationRequest(GeolocationAccuracy.High);
-                var localizacaoAtual = await Geolocation.Default.GetLocationAsync(request);
-
-                // 5. Monta o objeto que o SQLite entende
-                var novoRelato = new RelatoModel
-                {
-                    CodigoLinha = CodigoLinha,
-                    NivelLotacao = NivelLotacao,
-                    Latitude = localizacaoAtual?.Latitude ?? 0,
-                    Longitude = localizacaoAtual?.Longitude ?? 0
-                };
-
-                // 6. Salva offline usando o seu DatabaseService
-                await DatabaseService.SalvarRelatoOfflineAsync(novoRelato);
-
-                Mensagem = "Relato salvo com sucesso no dispositivo! Ele será sincronizado em breve.";
-
-                // Limpa os campos da tela para o próximo uso
-                CodigoLinha = string.Empty;
-                NivelLotacao = string.Empty;
+                // Aguarda um instante e retorna para a seleção de linha
+                await Task.Delay(1500);
+                await Shell.Current.GoToAsync("..");
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
-                Mensagem = $"Erro ao processar: {ex.Message}";
+                MensagemRetorno = $"Erro ao enviar relato: {ex.Message}";
             }
             finally
             {

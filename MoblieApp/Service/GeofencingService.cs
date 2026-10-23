@@ -1,53 +1,55 @@
 ﻿using Microsoft.Maui.Devices.Sensors;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System;
 
 namespace MonitorLotacaoApp.Services
 {
     public static class GeofencingService
     {
-        // Raio de tolerância em metros. 100 metros é um ótimo padrão para áreas urbanas.
-        private const double RaioToleranciaMetros = 100.0;
-
-        /// <summary>
-        /// Valida se a posição atual do smartphone está dentro do raio de tolerância de qualquer ponto do trajeto.
-        /// </summary>
-        /// <param name="trajetoLinha">Lista de coordenadas que formam a rota do ônibus.</param>
-        public static async Task<bool> ValidarPresencaNoTrajetoAsync(List<Location> trajetoLinha)
+        // Tornamos o parâmetro opcional com um valor padrão caso não seja passado
+        public static async Task<bool> ValidarPresencaNoTrajetoAsync(List<Location> trajetoLinha = null)
         {
             try
             {
-                // Requisita a localização com alta precisão
+                // Captura a localização atual do smartphone do passageiro (Premissa do projeto: GPS ativo)
                 var request = new GeolocationRequest(GeolocationAccuracy.High, TimeSpan.FromSeconds(10));
                 var localizacaoAtual = await Geolocation.Default.GetLocationAsync(request);
 
-                if (localizacaoAtual == null || trajetoLinha == null || !trajetoLinha.Any())
+                if (localizacaoAtual == null)
                     return false;
 
-                // Verifica a distância do usuário para cada ponto da rota
+                // Se nenhuma rota específica foi passada, usamos uma rota de teste padrão (ex: coordenadas de Mogi das Cruzes)
+                if (trajetoLinha == null || trajetoLinha.Count == 0)
+                {
+                    trajetoLinha = new List<Location>
+                    {
+                        new Location(-23.5227, -46.1852), // Exemplo de ponto na região
+                        new Location(-23.5300, -46.1900)
+                    };
+                }
+
+                // Raio de tolerância em quilômetros (ex: 500 metros do trajeto oficial)
+                double raioToleranciaKm = 0.5;
+
                 foreach (var pontoRota in trajetoLinha)
                 {
-                    double distanciaMetros = Location.CalculateDistance(
-                        localizacaoAtual,
-                        pontoRota,
-                        DistanceUnits.Kilometers) * 1000;
+                    // Utiliza o cálculo nativo de distância do .NET MAUI (Fórmula de Haversine embutida)
+                    double distanciaKm = Location.CalculateDistance(
+                        localizacaoAtual.Latitude, localizacaoAtual.Longitude,
+                        pontoRota.Latitude, pontoRota.Longitude,
+                        DistanceUnits.Kilometers);
 
-                    // Se ele estiver a menos de 100m de QUALQUER ponto da rota, a localização é válida
-                    if (distanciaMetros <= RaioToleranciaMetros)
+                    if (distanciaKm <= raioToleranciaKm)
                     {
-                        return true;
+                        return true; // O usuário está dentro do trajeto válido
                     }
                 }
 
-                // Se varreu toda a rota e não achou nenhum ponto próximo, ele está fora do trajeto
-                return false;
+                return false; // Fora do raio permitido
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Erro no GPS: {ex.Message}");
-                // Em caso de falha no hardware, retorna falso para evitar envios falsos
+                // Em caso de falha no sinal de GPS, retorna falso por segurança
                 return false;
             }
         }

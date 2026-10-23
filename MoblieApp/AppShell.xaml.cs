@@ -1,5 +1,5 @@
 ﻿using Microsoft.Maui.Controls;
-using MonitorLotacaoApp.Views; // Certifique-se de ter suas telas criadas nesta pasta
+using MonitorLotacaoApp.Views;
 
 namespace MonitorLotacaoApp
 {
@@ -9,12 +9,9 @@ namespace MonitorLotacaoApp
         {
             InitializeComponent();
 
-            // Registramos todas as telas do fluxo linear
-            Routing.RegisterRoute("RedefinirSenhaPage", typeof(RedefinirSenhaPage));
-            Routing.RegisterRoute("SelecaoLinhaPage", typeof(SelecionarLinhaPage));
-            Routing.RegisterRoute("RelatoPage", typeof(PassageiroHomePage));
-
-            // Se o Administrador ainda existir no projeto, mantemos a rota dele:
+            // Registo oficial das rotas do fluxo linear
+            Routing.RegisterRoute("SelecaoLinhaPage", typeof(SelecaoLinhaPage));
+            Routing.RegisterRoute("RelatoPage", typeof(RelatoPage));
             Routing.RegisterRoute("AdminDashboardPage", typeof(AdminDashboardPage));
         }
     }

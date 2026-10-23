@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MonitorLotacaoApp.ViewModels"
+             x:Class="MonitorLotacaoApp.Views.RelatoPage"
+             Title="Relatar Lotação"
+             BackgroundColor="#F5F5F5">
+
+    <ContentPage.BindingContext>
+        <vm:RelatoViewModel />
+    </ContentPage.BindingContext>
+
+    <VerticalStackLayout Spacing="20" Padding="30" VerticalOptions="Center">
+
+        <Label Text="Como está a lotação do ônibus?" 
+               FontSize="22" 
+               FontAttributes="Bold" 
+               TextColor="#1e81b0" 
+               HorizontalOptions="Center" />
+
+        <Label Text="{Binding StatusGPS}" 
+               FontSize="14" 
+               TextColor="#555555" 
+               HorizontalOptions="Center" />
+
+        <!-- Botões de Nível de Lotação -->
+        <Button Text="🟢 Tranquilo (Muitos lugares vazios)" 
+                Command="{Binding EnviarRelatoCommand}" 
+                CommandParameter="Tranquilo"
+                BackgroundColor="#2a9d8f" 
+                TextColor="White" 
+                HeightRequest="50"
+                CornerRadius="8"/>
+
+        <Button Text="🟡 Moderado (Passageiros em pé)" 
+                Command="{Binding EnviarRelatoCommand}" 
+                CommandParameter="Moderado"
+                BackgroundColor="#e9c46a" 
+                TextColor="#333333" 
+                HeightRequest="50"
+                CornerRadius="8"/>
+
+        <Button Text="🔴 Lotado (Capacidade máxima)" 
+                Command="{Binding EnviarRelatoCommand}" 
+                CommandParameter="Lotado"
+                BackgroundColor="#e76f51" 
+                TextColor="White" 
+                HeightRequest="50"
+                CornerRadius="8"/>
+
+        <!-- Indicador de Envio -->
+        <ActivityIndicator IsRunning="{Binding IsBusy}" 
+                           IsVisible="{Binding IsBusy}" 
+                           Color="#1e81b0" 
+                           HorizontalOptions="Center" />
+
+        <!-- Mensagem de Retorno -->
+        <Label Text="{Binding MensagemRetorno}" 
+               TextColor="#333333" 
+               HorizontalOptions="Center" 
+               FontAttributes="Bold"/>
+
+    </VerticalStackLayout>
+</ContentPage>
