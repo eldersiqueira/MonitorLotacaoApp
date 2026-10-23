@@ -1,14 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:MonitorLotacaoApp.ViewModels"
              x:Class="MonitorLotacaoApp.Views.LoginPage"
              Title="Autenticação"
              BackgroundColor="#F5F5F5">
-
-    <ContentPage.BindingContext>
-        <vm:LoginViewModel />
-    </ContentPage.BindingContext>
 
     <ScrollView>
         <VerticalStackLayout Spacing="20" Padding="30" VerticalOptions="Center">
@@ -20,35 +15,36 @@
                    TextColor="#1e81b0" 
                    Margin="0,0,0,20" />
 
-            <Entry Text="{Binding Email}"
-                   Placeholder="Digite seu E-mail" 
+            <Entry x:Name="TxtNome"
+                   Placeholder="Nome completo (apenas para cadastro)" 
+                   BackgroundColor="White"
+                   ClearButtonVisibility="WhileEditing"/>
+
+            <Entry x:Name="TxtEmail"
+                   Placeholder="E-mail profissional ou pessoal" 
                    Keyboard="Email" 
                    BackgroundColor="White"
                    ClearButtonVisibility="WhileEditing"/>
 
-            <Entry Text="{Binding Senha}"
-                   Placeholder="Digite sua Senha" 
+            <Entry x:Name="TxtSenha"
+                   Placeholder="Senha de acesso (mín. 6 caracteres)" 
                    IsPassword="True" 
                    BackgroundColor="White"
                    ClearButtonVisibility="WhileEditing"/>
 
-            <Label Text="{Binding MensagemErro}" 
-                   TextColor="Red" 
-                   HorizontalOptions="Center" 
-                   IsVisible="{Binding TemErro}" />
-
-            <ActivityIndicator IsRunning="{Binding IsBusy}" 
-                               IsVisible="{Binding IsBusy}" 
-                               Color="#1e81b0" 
-                               HorizontalOptions="Center" />
-
             <Button Text="Entrar" 
-                    Command="{Binding RealizarLoginCommand}" 
+                    Clicked="OnEntrarClicked" 
                     BackgroundColor="#1e81b0" 
                     TextColor="White" 
                     CornerRadius="8"
-                    HeightRequest="50"
-                    IsEnabled="{Binding IsNotBusy}" />
+                    HeightRequest="50" />
+
+            <Button Text="Cadastrar Nova Conta" 
+                    Clicked="OnCadastrarClicked" 
+                    BackgroundColor="#28a745" 
+                    TextColor="White" 
+                    CornerRadius="8"
+                    HeightRequest="50" />
 
         </VerticalStackLayout>
     </ScrollView>
