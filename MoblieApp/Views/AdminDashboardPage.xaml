@@ -1,31 +1,52 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MonitorLotacaoApp.Views.AdminDashboardPage">
+             x:Class="MonitorLotacaoApp.Views.AdminDashboardPage"
+             Title="Painel Administrativo - Gestão"
+             BackgroundColor="#F5F5F5">
 
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="20">
+        <VerticalStackLayout Spacing="20" Padding="25" VerticalOptions="Center">
 
-            <!-- Cabeçalho do Administrador (Alinhado ao Escopo do TCC) -->
-            <Label Text="Painel do Administrador (Gestão de Frota)"
-                   FontSize="22"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center"
-                   HorizontalTextAlignment="Center" />
+            <Label Text="Painel do Gestor de Frotas" 
+                   FontSize="26" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center" 
+                   TextColor="#1e81b0" 
+                   Margin="0,0,0,15"/>
 
-            <Label Text="Aqui serão exibidos os indicadores de eficiência, horários críticos e exportação de relatórios gerenciais."
-                   FontSize="14"
-                   TextColor="Gray"
-                   HorizontalOptions="Center"
-                   HorizontalTextAlignment="Center" />
+            <!-- 1. Visualizar Relatórios de Eficiência -->
+            <Button Text="📊 Visualizar Relatórios de Eficiência" 
+                    Clicked="OnVerRelatoriosClicked" 
+                    BackgroundColor="#1e81b0" 
+                    TextColor="White" 
+                    CornerRadius="8"
+                    HeightRequest="55" />
 
-            <!-- Botão para voltar ao perfil de Passageiro (para testes) -->
-            <Button Text="🔄 Alternar para Perfil de Passageiro (Teste)"
-                    BackgroundColor="#7F8C8D"
-                    TextColor="White"
-                    Clicked="OnSwitchToPassageiroClicked" />
+            <!-- 2. Identificar Horários Críticos -->
+            <Button Text="⏰ Identificar Horários Críticos" 
+                    Clicked="OnHorariosCriticosClicked" 
+                    BackgroundColor="#d9534f" 
+                    TextColor="White" 
+                    CornerRadius="8"
+                    HeightRequest="55" />
+
+            <!-- 3. Gerenciar Frotas e Linhas -->
+            <Button Text="🚌 Gerenciar Frotas e Linhas" 
+                    Clicked="OnGerenciarFrotaClicked" 
+                    BackgroundColor="#f0ad4e" 
+                    TextColor="White" 
+                    CornerRadius="8"
+                    HeightRequest="55" />
+
+            <!-- Ação complementar: Exportar Relatórios -->
+            <Button Text="📁 Exportar Relatórios (CSV/PDF)" 
+                    Clicked="OnExportarRelatoriosClicked" 
+                    BackgroundColor="#5cb85c" 
+                    TextColor="White" 
+                    CornerRadius="8"
+                    HeightRequest="55" />
 
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
-

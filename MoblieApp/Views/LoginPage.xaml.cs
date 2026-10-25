@@ -1,17 +1,21 @@
 ﻿using System.Text.RegularExpressions;
 using MonitorLotacaoApp.Models;
 using MonitorLotacaoApp.Services;
+using MonitorLotacaoApp.Views;
 
 namespace MonitorLotacaoApp.Views;
 
 public partial class LoginPage : ContentPage
 {
+    private readonly ApiService _apiService;
+
     public LoginPage()
     {
         InitializeComponent();
+        _apiService = new ApiService();
     }
 
-    // Método acionado ao clicar no botão "Entrar" (Figura 3 do TCC)[cite: 38]
+    // Método acionado ao clicar no botão "Entrar" (Comunicação com o MySQL via PHP)
     private async void OnEntrarClicked(object sender, EventArgs e)
     {
         string email = TxtEmail.Text?.Trim();
@@ -31,31 +35,38 @@ public partial class LoginPage : ContentPage
 
         try
         {
-            // Consulta assíncrona no banco de dados local SQLite
-            var passageiroCadastrado = await DatabaseService.ObterPassageiroPorEmailAsync(email);
+            // Consome a API que valida no MySQL centralizado
+            LoginResponse resultado = await _apiService.RealizarLoginRealAsync(email, senha);
 
-            if (passageiroCadastrado != null && passageiroCadastrado.Senha == senha)
+            if (resultado != null && resultado.sucesso)
             {
-                await DisplayAlert("Sucesso", $"Bem-vindo de volta, {passageiroCadastrado.Nome}!", "OK");
+                await DisplayAlert("Sucesso", $"Bem-vindo de volta, {resultado.nome}!", "OK");
 
-                // Navegação segura na thread principal para a tela de seleção de linhas (Sprint 2)[cite: 13, 39]
-                await MainThread.InvokeOnMainThreadAsync(async () =>
+                int tipoUsuario = resultado.tipo_usuario ?? 0;
+
+                // Redirecionamento baseado no perfil (0 = Passageiro, 1 = Administrador)
+                if (tipoUsuario == 1)
+                {
+                    await Navigation.PushAsync(new AdminDashboardPage());
+                }
+                else
                 {
                     await Navigation.PushAsync(new SelecionarLinhaPage());
-                });
+                }
             }
             else
             {
-                await DisplayAlert("Erro de Autenticação", "E-mail não cadastrado ou senha incorreta.", "OK");
+                string msgErro = resultado?.mensagem ?? "Credenciais inválidas ou utilizador não cadastrado.";
+                await DisplayAlert("Erro de Autenticação", msgErro, "OK");
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Erro", $"Ocorreu um erro ao acessar o banco de dados: {ex.Message}", "OK");
+            await DisplayAlert("Erro", $"Ocorreu um erro na conexão: {ex.Message}", "OK");
         }
     }
 
-    // Método acionado ao clicar no botão "Cadastrar Nova Conta" (Figura 4 e 5 do TCC)[cite: 39, 40]
+    // Método acionado ao clicar no botão "Cadastrar Nova Conta"
     private async void OnCadastrarClicked(object sender, EventArgs e)
     {
         string nome = TxtNome.Text?.Trim();
@@ -82,32 +93,18 @@ public partial class LoginPage : ContentPage
 
         try
         {
-            var existente = await DatabaseService.ObterPassageiroPorEmailAsync(email);
-            if (existente != null)
-            {
-                await DisplayAlert("Erro", "Este e-mail já está cadastrado no sistema.", "OK");
-                return;
-            }
+            bool cadastrado = await _apiService.CadastrarPassageiroAsync(nome, email, senha);
 
-            var novoPassageiro = new Passageiro
+            if (cadastrado)
             {
-                Nome = nome,
-                Email = email,
-                Senha = senha
-            };
-
-            var resultado = await DatabaseService.SalvarPassageiroAsync(novoPassageiro);
-
-            if (resultado > 0)
-            {
-                await DisplayAlert("Sucesso", "Cadastro de passageiro realizado com sucesso no SQLite!", "OK");
+                await DisplayAlert("Sucesso", "Registo efetuado com sucesso no MySQL!", "OK");
                 TxtNome.Text = string.Empty;
                 TxtEmail.Text = string.Empty;
                 TxtSenha.Text = string.Empty;
             }
             else
             {
-                await DisplayAlert("Erro", "Não foi possível salvar o cadastro no dispositivo.", "OK");
+                await DisplayAlert("Erro", "Não foi possível efetuar o registo. O e-mail pode já estar em uso.", "OK");
             }
         }
         catch (Exception ex)
@@ -116,7 +113,6 @@ public partial class LoginPage : ContentPage
         }
     }
 
-    // Função auxiliar para validação de Regex do E-mail (Figura 6 do TCC)[cite: 41]
     private bool ValidarFormatoEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email))

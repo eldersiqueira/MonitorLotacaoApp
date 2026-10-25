@@ -3,63 +3,74 @@ using MonitorLotacaoApp.Models;
 
 namespace MonitorLotacaoApp.Services
 {
-    public class DatabaseService
+    public static class DatabaseService
     {
-        private static SQLiteAsyncConnection _database;
+        static SQLiteAsyncConnection _database;
 
-        private static async Task Init()
+        public static async Task Init()
         {
             if (_database != null)
                 return;
 
-            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "monitor_lotacao.db3");
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "lugus_lotacao.db3");
             _database = new SQLiteAsyncConnection(dbPath);
 
-            // Cria as tabelas da Sprint 1 e Sprint 3
+            // Criação das tabelas do sistema no SQLite local (.NET MAUI)
             await _database.CreateTableAsync<Passageiro>();
+            await _database.CreateTableAsync<AdministradorModel>();
             await _database.CreateTableAsync<RelatoModel>();
+
+            // Insere um administrador padrão caso a tabela esteja vazia (para testes)
+            var totalAdmins = await _database.Table<AdministradorModel>().CountAsync();
+            if (totalAdmins == 0)
+            {
+                await _database.InsertAsync(new AdministradorModel
+                {
+                    Nome = "Gestor de Transporte",
+                    Login = "admin",
+                    Senha = "123456"
+                });
+            }
         }
 
-        // --- Métodos para Passageiros (Sprint 1) ---
+        // --- MÉTODOS DE PASSAGEIRO ---
+        public static async Task<Passageiro> ObterPassageiroPorEmailAsync(string email)
+        {
+            await Init();
+            return await _database.Table<Passageiro>().Where(p => p.Email == email).FirstOrDefaultAsync();
+        }
+
         public static async Task<int> SalvarPassageiroAsync(Passageiro passageiro)
         {
             await Init();
             return await _database.InsertAsync(passageiro);
         }
 
-        public static async Task<Passageiro> ObterPassageiroPorEmailAsync(string email)
+        // --- MÉTODOS DE ADMINISTRADOR ---
+        public static async Task<AdministradorModel> ObterAdministradorPorLoginAsync(string login)
         {
             await Init();
-            return await _database.Table<Passageiro>()
-                                  .Where(p => p.Email == email)
-                                  .FirstOrDefaultAsync();
+            return await _database.Table<AdministradorModel>().Where(a => a.Login == login).FirstOrDefaultAsync();
         }
 
-        // --- Métodos para Relatos Offline (Sprint 3) ---
-        public static async Task<int> SalvarRelatoOfflineAsync(RelatoModel relato)
+        // --- MÉTODOS DE RELATOS OFFLINE ---
+        public static async Task<int> SalvarRelatoAsync(RelatoModel relato)
         {
             await Init();
-            relato.Horario = DateTime.Now;
-            relato.Status = "Pendente";
-            relato.Sincronizado = false;
-
             return await _database.InsertAsync(relato);
         }
 
         public static async Task<List<RelatoModel>> ObterRelatosPendentesAsync()
         {
             await Init();
-            return await _database.Table<RelatoModel>()
-                                  .Where(r => r.Sincronizado == false)
-                                  .ToListAsync();
+            return await _database.Table<RelatoModel>().Where(r => r.Sincronizado == false).ToListAsync();
         }
 
-        public static async Task AtualizarRelatoSincronizadoAsync(RelatoModel relato)
+        public static async Task<int> AtualizarRelatoSincronizadoAsync(RelatoModel relato)
         {
             await Init();
             relato.Sincronizado = true;
-            relato.Status = "Sincronizado";
-            await _database.UpdateAsync(relato);
+            return await _database.UpdateAsync(relato);
         }
     }
 }
