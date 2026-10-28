@@ -2,49 +2,64 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MonitorLotacaoApp.Views.LoginPage"
-             Title="Autenticação"
-             BackgroundColor="#F5F5F5">
+             Title="Autenticação">
 
     <ScrollView>
-        <VerticalStackLayout Spacing="20" Padding="30" VerticalOptions="Center">
+        <VerticalStackLayout Padding="30" Spacing="20" VerticalOptions="Center">
 
-            <Label Text="Monitor de Lotação" 
-                   FontSize="28" 
-                   FontAttributes="Bold" 
-                   HorizontalOptions="Center" 
-                   TextColor="#1e81b0" 
-                   Margin="0,0,0,20" />
+            <!-- Título Principal -->
+            <Label Text="Monitor de Lotação"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="#1b6ca8" />
 
+            <Label Text="Faça login ou cadastre-se para continuar"
+                   FontSize="14"
+                   HorizontalOptions="Center"
+                   TextColor="Gray"
+                   Margin="0,0,0,20"/>
+
+            <!-- Campos de Entrada -->
             <Entry x:Name="TxtNome"
-                   Placeholder="Nome completo (apenas para cadastro)" 
-                   BackgroundColor="White"
-                   ClearButtonVisibility="WhileEditing"/>
+                   Placeholder="Nome completo (apenas para cadastro)"
+                   ClearButtonVisibility="WhileEditing" />
 
             <Entry x:Name="TxtEmail"
-                   Placeholder="E-mail profissional ou pessoal" 
-                   Keyboard="Email" 
-                   BackgroundColor="White"
-                   ClearButtonVisibility="WhileEditing"/>
+                   Placeholder="E-mail profissional ou pessoal"
+                   Keyboard="Email"
+                   ClearButtonVisibility="WhileEditing" />
 
             <Entry x:Name="TxtSenha"
-                   Placeholder="Senha de acesso (mín. 6 caracteres)" 
-                   IsPassword="True" 
-                   BackgroundColor="White"
-                   ClearButtonVisibility="WhileEditing"/>
+                   Placeholder="Senha de acesso (mín. 6 caracteres)"
+                   IsPassword="True"
+                   ClearButtonVisibility="WhileEditing" />
 
-            <Button Text="Entrar" 
-                    Clicked="OnEntrarClicked" 
-                    BackgroundColor="#1e81b0" 
-                    TextColor="White" 
+            <!-- Botões de Ação -->
+            <Button x:Name="BtnEntrar"
+                    Text="Entrar"
+                    BackgroundColor="#1b6ca8"
+                    TextColor="White"
                     CornerRadius="8"
-                    HeightRequest="50" />
+                    HeightRequest="50"
+                    Clicked="OnEntrarClicked" />
 
-            <Button Text="Cadastrar Nova Conta" 
-                    Clicked="OnCadastrarClicked" 
-                    BackgroundColor="#28a745" 
-                    TextColor="White" 
+            <Button x:Name="BtnCadastrar"
+                    Text="Cadastrar Nova Conta"
+                    BackgroundColor="#28a745"
+                    TextColor="White"
                     CornerRadius="8"
-                    HeightRequest="50" />
+                    HeightRequest="50"
+                    Clicked="OnCadastrarClicked" />
+
+            <!-- Botão do Tópico 1: Redefinição de Senha -->
+            <Button x:Name="BtnRedefinir"
+                    Text="Esqueci / Redefinir Senha"
+                    BackgroundColor="#f0ad4e"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="45"
+                    Clicked="OnRedefinirSenhaClicked" />
 
         </VerticalStackLayout>
     </ScrollView>

@@ -14,11 +14,10 @@ public partial class AdminDashboardPage : ContentPage
     {
         try
         {
-            // Busca todos os relatos salvos no banco local SQLite
-            var relatos = await DatabaseService.ObterRelatosPendentesAsync(); // Ou método geral de listagem
+            var relatos = await DatabaseService.ObterRelatosPendentesAsync();
             int totalRelatos = relatos != null ? relatos.Count : 0;
 
-            string mensagem = $"📊 **Relatório Geral de Eficiência**\n\n" +
+            string mensagem = $"📊 Relatório Geral de Eficiência\n\n" +
                               $"• Total de Relatos Coletados: {totalRelatos}\n" +
                               $"• Linhas Monitoradas: 5 Linhas Oficiais\n" +
                               $"• Meta de Impacto: Redução de 10% no tempo de espera.\n" +
@@ -35,8 +34,7 @@ public partial class AdminDashboardPage : ContentPage
     // 2. Funcionalidade: Identificar Horários Críticos
     private async void OnHorariosCriticosClicked(object sender, EventArgs e)
     {
-        // Conforme a classe Relatório do TCC: identificarHorariosCriticos()
-        string mensagemCritica = "⏰ **Análise de Horários Críticos**\n\n" +
+        string mensagemCritica = "⏰ Análise de Horários Críticos\n\n" +
                                  "• Pico da Manhã: 07:00 às 08:30 (Linhas 01 e 03 com alta concentração de lotação).\n" +
                                  "• Pico da Tarde: 17:30 às 19:00 (Linha 04 superlotada).\n\n" +
                                  "Recomendação ao Gestor: Reforçar frota nesses horários.";
@@ -47,7 +45,6 @@ public partial class AdminDashboardPage : ContentPage
     // 3. Funcionalidade: Gerenciar Frotas e Linhas
     private async void OnGerenciarFrotaClicked(object sender, EventArgs e)
     {
-        // Conforme a classe LinhaÔnibus e Administrador -> gerenciarFrota()[cite: 13]
         string selecaoLinha = await DisplayActionSheet(
             "Gerenciamento de Frotas (5 Linhas Oficiais)",
             "Cancelar",
@@ -64,10 +61,15 @@ public partial class AdminDashboardPage : ContentPage
         }
     }
 
-    // Ação complementar de exportação de dados
+    // 4. Funcionalidade: Exportar Relatórios
     private async void OnExportarRelatoriosClicked(object sender, EventArgs e)
     {
-        // Conforme método exportarRelatorios() do diagrama[cite: 13]
         await DisplayAlert("Exportação", "Os dados estatísticos e relatórios de eficiência foram exportados com sucesso para o formato CSV no diretório do sistema.", "OK");
+    }
+
+    // 5. Nova Funcionalidade: Direcionar para a Tela de Gestão de Acessos
+    private async void OnGerenciarAcessosClicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new AdminGerenciarUsuariosPage());
     }
 }

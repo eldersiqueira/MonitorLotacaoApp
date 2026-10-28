@@ -2,50 +2,63 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MonitorLotacaoApp.Views.AdminDashboardPage"
-             Title="Painel Administrativo - Gestão"
-             BackgroundColor="#F5F5F5">
+             Title="Painel do Administrador - Gestão">
 
     <ScrollView>
-        <VerticalStackLayout Spacing="20" Padding="25" VerticalOptions="Center">
+        <VerticalStackLayout Padding="25" Spacing="15" VerticalOptions="Center">
 
-            <Label Text="Painel do Gestor de Frotas" 
-                   FontSize="26" 
-                   FontAttributes="Bold" 
-                   HorizontalOptions="Center" 
-                   TextColor="#1e81b0" 
+            <!-- Título do Painel -->
+            <Label Text="Painel do Gestor de Frotas"
+                   FontSize="26"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="#1b6ca8" />
+
+            <Label Text="Gerencie frotas, relatórios e acessos do sistema"
+                   FontSize="14"
+                   HorizontalOptions="Center"
+                   TextColor="Gray"
                    Margin="0,0,0,15"/>
 
-            <!-- 1. Visualizar Relatórios de Eficiência -->
-            <Button Text="📊 Visualizar Relatórios de Eficiência" 
-                    Clicked="OnVerRelatoriosClicked" 
-                    BackgroundColor="#1e81b0" 
-                    TextColor="White" 
+            <!-- Botão 1: Visualizar Relatórios de Eficiência -->
+            <Button Text="📊 Visualizar Relatórios de Eficiência"
+                    BackgroundColor="#1b6ca8"
+                    TextColor="White"
                     CornerRadius="8"
-                    HeightRequest="55" />
+                    HeightRequest="50"
+                    Clicked="OnVerRelatoriosClicked" />
 
-            <!-- 2. Identificar Horários Críticos -->
-            <Button Text="⏰ Identificar Horários Críticos" 
-                    Clicked="OnHorariosCriticosClicked" 
-                    BackgroundColor="#d9534f" 
-                    TextColor="White" 
+            <!-- Botão 2: Identificar Horários Críticos -->
+            <Button Text="⏰ Identificar Horários Críticos"
+                    BackgroundColor="#d9534f"
+                    TextColor="White"
                     CornerRadius="8"
-                    HeightRequest="55" />
+                    HeightRequest="50"
+                    Clicked="OnHorariosCriticosClicked" />
 
-            <!-- 3. Gerenciar Frotas e Linhas -->
-            <Button Text="🚌 Gerenciar Frotas e Linhas" 
-                    Clicked="OnGerenciarFrotaClicked" 
-                    BackgroundColor="#f0ad4e" 
-                    TextColor="White" 
+            <!-- Botão 3: Gerenciar Frotas e Linhas -->
+            <Button Text="🚌 Gerenciar Frotas e Linhas"
+                    BackgroundColor="#f0ad4e"
+                    TextColor="White"
                     CornerRadius="8"
-                    HeightRequest="55" />
+                    HeightRequest="50"
+                    Clicked="OnGerenciarFrotaClicked" />
 
-            <!-- Ação complementar: Exportar Relatórios -->
-            <Button Text="📁 Exportar Relatórios (CSV/PDF)" 
-                    Clicked="OnExportarRelatoriosClicked" 
-                    BackgroundColor="#5cb85c" 
-                    TextColor="White" 
+            <!-- Botão 4: Exportar Relatórios -->
+            <Button Text="📁 Exportar Relatórios (CSV/PDF)"
+                    BackgroundColor="#5cb85c"
+                    TextColor="White"
                     CornerRadius="8"
-                    HeightRequest="55" />
+                    HeightRequest="50"
+                    Clicked="OnExportarRelatoriosClicked" />
+
+            <!-- Novo Botão: Gestão de Acessos de Perfis -->
+            <Button Text="👥 Gestão de Acessos de Perfis"
+                    BackgroundColor="#0275d8"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    Clicked="OnGerenciarAcessosClicked" />
 
         </VerticalStackLayout>
     </ScrollView>

@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using MonitorLotacaoApp.Models;
 using MonitorLotacaoApp.Services;
 using MonitorLotacaoApp.Views;
 
@@ -15,7 +14,6 @@ public partial class LoginPage : ContentPage
         _apiService = new ApiService();
     }
 
-    // Método acionado ao clicar no botão "Entrar" (Comunicação com o MySQL via PHP)
     private async void OnEntrarClicked(object sender, EventArgs e)
     {
         string email = TxtEmail.Text?.Trim();
@@ -35,7 +33,6 @@ public partial class LoginPage : ContentPage
 
         try
         {
-            // Consome a API que valida no MySQL centralizado
             LoginResponse resultado = await _apiService.RealizarLoginRealAsync(email, senha);
 
             if (resultado != null && resultado.sucesso)
@@ -44,7 +41,7 @@ public partial class LoginPage : ContentPage
 
                 int tipoUsuario = resultado.tipo_usuario ?? 0;
 
-                // Redirecionamento baseado no perfil (0 = Passageiro, 1 = Administrador)
+                // Redirecionamento correto: Administrador vai para o Painel do ADM
                 if (tipoUsuario == 1)
                 {
                     await Navigation.PushAsync(new AdminDashboardPage());
@@ -66,7 +63,6 @@ public partial class LoginPage : ContentPage
         }
     }
 
-    // Método acionado ao clicar no botão "Cadastrar Nova Conta"
     private async void OnCadastrarClicked(object sender, EventArgs e)
     {
         string nome = TxtNome.Text?.Trim();
@@ -110,6 +106,37 @@ public partial class LoginPage : ContentPage
         catch (Exception ex)
         {
             await DisplayAlert("Erro", $"Exceção ao cadastrar: {ex.Message}", "OK");
+        }
+    }
+
+    private async void OnRedefinirSenhaClicked(object sender, EventArgs e)
+    {
+        string email = TxtEmail.Text?.Trim();
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            await DisplayAlert("Atenção", "Digite o seu e-mail no campo correspondente acima para iniciar a redefinição de senha.", "OK");
+            return;
+        }
+
+        string novaSenha = await DisplayPromptAsync("Redefinição de Senha", "Digite a sua nova senha (mínimo 6 caracteres):", "Confirmar", "Cancelar", keyboard: Keyboard.Text);
+
+        if (string.IsNullOrWhiteSpace(novaSenha) || novaSenha.Length < 6)
+        {
+            await DisplayAlert("Atenção", "A nova senha deve ter pelo menos 6 caracteres.", "OK");
+            return;
+        }
+
+        bool sucesso = await _apiService.RedefinirSenhaAsync(email, novaSenha);
+
+        if (sucesso)
+        {
+            await DisplayAlert("Sucesso", "Senha redefinida com sucesso no MySQL!", "OK");
+            TxtSenha.Text = string.Empty;
+        }
+        else
+        {
+            await DisplayAlert("Erro", "Não foi possível redefinir a senha. Verifique se o e-mail está cadastrado.", "OK");
         }
     }
 
