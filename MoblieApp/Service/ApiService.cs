@@ -127,23 +127,20 @@ namespace MonitorLotacaoApp.Services
         {
             try
             {
-                var payload = new
-                {
-                    CodigoLinha = codigoLinha,
-                    NivelLotacao = nivelLotacao,
-                    Horario = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                    Status = "Ativo"
-                };
-
-                var resposta = await _httpClient.PostAsJsonAsync($"{BaseUrl}sincronizar.php", payload);
+                var parametros = new Dictionary<string, string>
+        {
+            { "CodigoLinha", codigoLinha },
+            { "NivelLotacao", nivelLotacao },
+            { "Horario", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") },
+            { "Status", "Ativo" }
+        };
+                var conteudo = new FormUrlEncodedContent(parametros);
+                var resposta = await _httpClient.PostAsync($"{BaseUrl}sincronizar.php", conteudo);
 
                 if (resposta.IsSuccessStatusCode)
                 {
                     string retornoJson = await resposta.Content.ReadAsStringAsync();
-                    var resultado = JsonSerializer.Deserialize<ApiResponse>(retornoJson, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+                    var resultado = JsonSerializer.Deserialize<ApiResponse>(retornoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     return resultado != null && resultado.sucesso;
                 }
             }
@@ -182,23 +179,20 @@ namespace MonitorLotacaoApp.Services
         {
             try
             {
-                var payload = new
-                {
-                    idPassageiro = idPassageiro,
-                    nome = nome,
-                    email = email,
-                    tipo_usuario = tipoUsuario
-                };
-
-                var resposta = await _httpClient.PostAsJsonAsync($"{BaseUrl}atualizar_usuario.php", payload);
+                var parametros = new Dictionary<string, string>
+        {
+            { "idPassageiro", idPassageiro.ToString() },
+            { "nome", nome },
+            { "email", email },
+            { "tipo_usuario", tipoUsuario.ToString() }
+        };
+                var conteudo = new FormUrlEncodedContent(parametros);
+                var resposta = await _httpClient.PostAsync($"{BaseUrl}atualizar_usuario.php", conteudo);
 
                 if (resposta.IsSuccessStatusCode)
                 {
-                    string json = await resposta.Content.ReadAsStringAsync();
-                    var resultado = JsonSerializer.Deserialize<ApiResponse>(json, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+                    string retornoJson = await resposta.Content.ReadAsStringAsync();
+                    var resultado = JsonSerializer.Deserialize<ApiResponse>(retornoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     return resultado != null && resultado.sucesso;
                 }
             }
@@ -213,20 +207,17 @@ namespace MonitorLotacaoApp.Services
         {
             try
             {
-                var payload = new
-                {
-                    idPassageiro = idPassageiro
-                };
-
-                var resposta = await _httpClient.PostAsJsonAsync($"{BaseUrl}deletar_usuario.php", payload);
+                var parametros = new Dictionary<string, string>
+        {
+            { "idPassageiro", idPassageiro.ToString() }
+        };
+                var conteudo = new FormUrlEncodedContent(parametros);
+                var resposta = await _httpClient.PostAsync($"{BaseUrl}deletar_usuario.php", conteudo);
 
                 if (resposta.IsSuccessStatusCode)
                 {
-                    string json = await resposta.Content.ReadAsStringAsync();
-                    var resultado = JsonSerializer.Deserialize<ApiResponse>(json, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+                    string retornoJson = await resposta.Content.ReadAsStringAsync();
+                    var resultado = JsonSerializer.Deserialize<ApiResponse>(retornoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     return resultado != null && resultado.sucesso;
                 }
             }
@@ -235,6 +226,41 @@ namespace MonitorLotacaoApp.Services
                 Console.WriteLine($"Erro ao deletar utilizador: {ex.Message}");
             }
             return false;
+        }
+
+        public class EstatisticasAdminResponse
+        {
+            public bool sucesso { get; set; }
+            public int totalRelatos { get; set; }
+            public List<HorarioCriticoDto> horariosCriticos { get; set; }
+        }
+
+        public class HorarioCriticoDto
+        {
+            public int hora { get; set; }
+            public int quantidade { get; set; }
+        }
+
+        // Adicione este método dentro da classe ApiService
+        public async Task<EstatisticasAdminResponse> ObterEstatisticasAsync()
+        {
+            try
+            {
+                var resposta = await _httpClient.GetAsync($"{BaseUrl}estatisticas_admin.php");
+                if (resposta.IsSuccessStatusCode)
+                {
+                    string json = await resposta.Content.ReadAsStringAsync();
+                    return JsonSerializer.Deserialize<EstatisticasAdminResponse>(json, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao obter estatísticas: {ex.Message}");
+            }
+            return null;
         }
     }
 }
