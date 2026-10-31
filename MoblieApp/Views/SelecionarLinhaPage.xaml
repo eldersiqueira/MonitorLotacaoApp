@@ -23,12 +23,13 @@
         <CollectionView x:Name="CollectionLinhas" SelectionMode="Single" SelectionChanged="OnLinhaSelected">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Margin="0,5" Padding="15" CornerRadius="10" BackgroundColor="White" HasShadow="True">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="{Binding NomeLinha}" FontSize="18" FontAttributes="Bold" TextColor="#2980B9"/>
-                            <Label Text="{Binding Trajeto}" FontSize="12" TextColor="#555555"/>
+                    <!-- O Frame ou Border atua como a área sensível ao toque -->
+                    <Border Stroke="#E0E0E0" StrokeThickness="1" StrokeShape="RoundRectangle 12" BackgroundColor="White" Padding="15" Margin="0,5">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding NomeLinha}" FontSize="18" FontAttributes="Bold" TextColor="#0056b3"/>
+                            <Label Text="{Binding Trajeto}" FontSize="13" TextColor="#666666"/>
                         </VerticalStackLayout>
-                    </Frame>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

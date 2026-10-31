@@ -5,8 +5,17 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace MonitorLotacaoApp.Services
+namespace MonitorLotacaoApp.Services 
+{ 
+
+    public class PontoItinerarioDto
 {
+    public int idPonto { get; set; }
+    public string nomePonto { get; set; }
+    public double latitude { get; set; }
+    public double longitude { get; set; }
+}
+
     public class LoginResponse
     {
         public bool sucesso { get; set; }
@@ -149,6 +158,33 @@ namespace MonitorLotacaoApp.Services
                 Console.WriteLine($"Erro ao sincronizar relato: {ex.Message}");
             }
             return false;
+        }
+
+        public async Task<List<PontoItinerarioDto>> ObterItinerarioAsync(string codigoLinha)
+        {
+            try
+            {
+                var resposta = await _httpClient.GetAsync($"{BaseUrl}listar_itinerario.php?codigoLinha={codigoLinha}");
+                if (resposta.IsSuccessStatusCode)
+                {
+                    string json = await resposta.Content.ReadAsStringAsync();
+                    var resultado = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+
+                    if (resultado != null && resultado.ContainsKey("sucesso") && resultado["sucesso"].ToString() == "True")
+                    {
+                        var arrayPontos = ((JsonElement)resultado["itinerario"]).GetRawText();
+                        return JsonSerializer.Deserialize<List<PontoItinerarioDto>>(arrayPontos, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao obter itinerário: {ex.Message}");
+            }
+            return new List<PontoItinerarioDto>();
         }
 
         // --- GESTÃO DE ACESSOS (PERFIL ADM) ---

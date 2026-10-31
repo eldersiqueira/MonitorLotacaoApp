@@ -19,7 +19,7 @@ public partial class AdminDashboardPage : ContentPage
 
         string mensagem = $"📊 Relatório Geral de Eficiência\n\n" +
                           $"• Total de Relatos Coletados: {totalRelatos}\n" +
-                          $"• Linhas Monitoradas: 5 Linhas Oficiais\n" +
+                          $"• Linhas Monitoradas: 5 Linhas Oficiais + Teste\n" +
                           $"• Meta de Impacto: Redução de 10% no tempo de espera.";
 
         await DisplayAlert("Relatório de Eficiência", mensagem, "OK");
@@ -28,7 +28,7 @@ public partial class AdminDashboardPage : ContentPage
     private async void OnHorariosCriticosClicked(object sender, EventArgs e)
     {
         var estatisticas = await _apiService.ObterEstatisticasAsync();
-        string mensagemCritica = "⏰ Análise de Horários Críticos\n\n";
+        string mensagemCritica = "⏰ Análise de Horários Criticos\n\n";
 
         if (estatisticas != null && estatisticas.horariosCriticos != null && estatisticas.horariosCriticos.Count > 0)
         {
@@ -46,21 +46,18 @@ public partial class AdminDashboardPage : ContentPage
         await DisplayAlert("Horários Críticos", mensagemCritica, "OK");
     }
 
-    // Mantenha os outros métodos (OnGerenciarFrotaClicked, OnExportarRelatoriosClicked, OnGerenciarAcessosClicked) intactos aqui
-
-
-    // 3. Funcionalidade: Gerenciar Frotas e Linhas
+    // 3. Funcionalidade: Gerenciar Frotas e Linhas Atualizadas com o Escopo de Mogi das Cruzes
     private async void OnGerenciarFrotaClicked(object sender, EventArgs e)
     {
         string selecaoLinha = await DisplayActionSheet(
-            "Gerenciamento de Frotas (5 Linhas Oficiais)",
+            "Gerenciamento de Frotas (Linhas Oficiais)",
             "Cancelar",
             null,
-            "Linha 01 - Centro / Terminal Leste",
-            "Linha 02 - Bairro Alto / Vila Industrial",
-            "Linha 03 - Circular Universitária",
-            "Linha 04 - Distrito Industrial / Estação",
-            "Linha 05 - Parque das Flores / Centro");
+            "Linha E108 - Jd. Universo",
+            "Linha C603 - Estrada Imperial",
+            "Linha C602 - Botujuru",
+            "Linha E203 - Cj. Santo Ângelo",
+            "Linha 304 - Socorro");
 
         if (!string.IsNullOrEmpty(selecaoLinha) && selecaoLinha != "Cancelar")
         {

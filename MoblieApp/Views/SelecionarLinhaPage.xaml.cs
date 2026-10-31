@@ -1,4 +1,7 @@
 ﻿using MonitorLotacaoApp.Models;
+using Microsoft.Maui.Controls;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace MonitorLotacaoApp.Views;
 
@@ -12,14 +15,15 @@ public partial class SelecionarLinhaPage : ContentPage
 
     private void CarregarLinhasDeOnibus()
     {
-        // Mock inicial das 5 linhas municipais previstas no escopo do TCC
+        // Linhas oficiais de Mogi das Cruzes e Linha de Teste alinhadas com o banco de dados
         var linhas = new List<LinhaOnibusModel>
         {
-            new LinhaOnibusModel { CodigoLinha = "01", NomeLinha = "Linha 01 - Centro / Terminal Leste", Trajeto = "Via Av. Principal" },
-            new LinhaOnibusModel { CodigoLinha = "02", NomeLinha = "Linha 02 - Bairro Alto / Vila Industrial", Trajeto = "Via Rodovia Municipal" },
-            new LinhaOnibusModel { CodigoLinha = "03", NomeLinha = "Linha 03 - Circular Universitária", Trajeto = "Via Campus / Hospital" },
-            new LinhaOnibusModel { CodigoLinha = "04", NomeLinha = "Linha 04 - Distrito Industrial / Estação", Trajeto = "Via Av. dos Trabalhadores" },
-            new LinhaOnibusModel { CodigoLinha = "05", NomeLinha = "Linha 05 - Parque das Flores / Centro", Trajeto = "Via Bairro Comercial" }
+            new LinhaOnibusModel { CodigoLinha = "E108", NomeLinha = "Linha E108 - Jd. Universo", Trajeto = "Terminal Central - Av. Japão - Jd. Universo" },
+            new LinhaOnibusModel { CodigoLinha = "C603", NomeLinha = "Linha C603 - Estrada Imperial", Trajeto = "Terminal Central - Av. Voluntário F. Pinheiro Franco - Estrada Imperial" },
+            new LinhaOnibusModel { CodigoLinha = "C602", NomeLinha = "Linha C602 - Botujuru", Trajeto = "Terminal Central - R. Barão de Jaceguai - Botujuru" },
+            new LinhaOnibusModel { CodigoLinha = "E203", NomeLinha = "Linha E203 - Cj. Santo Ângelo", Trajeto = "Terminal Central - Av. Henrique Peres - Santo Ângelo" },
+            new LinhaOnibusModel { CodigoLinha = "304",  NomeLinha = "Linha 304 - Socorro", Trajeto = "Terminal Central - R. Dr. Corrêa - Shopping Mogi" },
+            new LinhaOnibusModel { CodigoLinha = "TESTE", NomeLinha = "Linha Teste - Residência", Trajeto = "Base de Desenvolvimento - Mogi das Cruzes" }
         };
 
         CollectionLinhas.ItemsSource = linhas;
@@ -31,10 +35,9 @@ public partial class SelecionarLinhaPage : ContentPage
         if (linhaSelecionada == null)
             return;
 
-        // Limpa a seleção visual
         CollectionLinhas.SelectedItem = null;
 
-        // CORREÇÃO: Passa o 'CodigoLinha' da linha escolhida para a tela de reporte
-        await Navigation.PushAsync(new ReportarLotacaoPage(linhaSelecionada.CodigoLinha));
+        // Navega passando tanto o código (para a API) quanto o nome (para exibição na tela)
+        await Navigation.PushAsync(new ReportarLotacaoPage(linhaSelecionada.CodigoLinha, linhaSelecionada.NomeLinha));
     }
-    }
+}

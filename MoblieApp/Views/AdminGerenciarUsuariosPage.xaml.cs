@@ -1,4 +1,5 @@
 ﻿using MonitorLotacaoApp.Services;
+using MonitorLotacaoApp.Models;
 
 namespace MonitorLotacaoApp.Views;
 
@@ -18,15 +19,20 @@ public partial class AdminGerenciarUsuariosPage : ContentPage
         await CarregarUsuariosAsync();
     }
 
-    private async void OnCarregarUsuariosClicked(object sender, EventArgs e)
-    {
-        await CarregarUsuariosAsync();
-    }
-
     private async Task CarregarUsuariosAsync()
     {
-        var usuarios = await _apiService.ObterTodosUsuariosAsync();
-        CvUsuarios.ItemsSource = usuarios;
+        try
+        {
+            var usuarios = await _apiService.ObterTodosUsuariosAsync();
+            if (usuarios != null)
+            {
+                CvUsuarios.ItemsSource = usuarios; // Linha 29 vinculada perfeitamente ao x:Name do XAML
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Erro", $"Não foi possível carregar os utilizadores: {ex.Message}", "OK");
+        }
     }
 
     private async void OnEditarClicked(object sender, EventArgs e)

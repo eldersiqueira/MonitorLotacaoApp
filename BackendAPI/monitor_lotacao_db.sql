@@ -1,107 +1,250 @@
--- Criação da Base de Dados oficial do TCC
 CREATE DATABASE IF NOT EXISTS monitor_lotacao_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE monitor_lotacao_db;
 
--- --------------------------------------------------------
--- 1. Tabela de Passageiros e Administradores (Unificada com controle de perfil)
--- --------------------------------------------------------
-CREATE TABLE IF NOT EXISTS passageiros (
-    idPassageiro INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    senha VARCHAR(255) NOT NULL,
-    tipo_usuario INT DEFAULT 0 -- 0 = Passageiro Comum, 1 = Administrador (Gestão)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- ==========================================
+-- 1. ESTRUTURA DE TABELAS (DDL)
+-- ==========================================
 
--- --------------------------------------------------------
--- 2. Tabela de Linhas de Ônibus (As 5 linhas do escopo do projeto)
--- --------------------------------------------------------
 CREATE TABLE IF NOT EXISTS linhas_onibus (
     codigoLinha VARCHAR(10) PRIMARY KEY,
     nomeLinha VARCHAR(100) NOT NULL,
     trajeto TEXT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- --------------------------------------------------------
--- 3. Tabela de Relatos Colaborativos de Lotação
--- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS pontos_itinerario (
+    idPonto INT AUTO_INCREMENT PRIMARY KEY,
+    codigoLinha VARCHAR(10) NOT NULL,
+    nomePonto VARCHAR(100) NOT NULL,
+    latitude DECIMAL(10, 8) NOT NULL,
+    longitude DECIMAL(11, 8) NOT NULL,
+    ordem INT NOT NULL,
+    CONSTRAINT fk_itinerario_linha FOREIGN KEY (codigoLinha) REFERENCES linhas_onibus(codigoLinha) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS passageiros (
+    idPassageiro INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    tipo_usuario INT DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS relatos (
     idRelato INT AUTO_INCREMENT PRIMARY KEY,
     codigoLinha VARCHAR(10) NOT NULL,
     horario DATETIME NOT NULL,
-    nivelLotacao VARCHAR(50) NOT NULL, -- Ex: Vazio, Moderado, Lotado
+    nivelLotacao VARCHAR(50) NOT NULL,
     status VARCHAR(50) DEFAULT 'Ativo',
-    CONSTRAINT fk_relato_linha FOREIGN KEY (codigoLinha) REFERENCES linhas_onibus(codigoLinha)
+    idPassageiro INT,
+    CONSTRAINT fk_relato_linha FOREIGN KEY (codigoLinha) REFERENCES linhas_onibus(codigoLinha) ON DELETE CASCADE,
+    CONSTRAINT fk_relato_passageiro FOREIGN KEY (idPassageiro) REFERENCES passageiros(idPassageiro) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- --------------------------------------------------------
--- 4. Inserção de Dados Iniciais (Seeders)
--- --------------------------------------------------------
+-- ==========================================
+-- 2. DADOS CADASTRAIS (LINHAS E PONTOS)
+-- ==========================================
 
--- Inserção das 5 linhas de ônibus monitoradas (Escopo da Prova de Conceito)
-INSERT INTO linhas_onibus (codigoLinha, nomeLinha, trajeto) VALUES 
-('01', 'Linha 01 - Centro / Bairro', 'Centro - Av. Principal - Bairro'),
-('02', 'Linha 02 - Circular Universitária', 'Terminal - Campus - Estação'),
-('03', 'Linha 03 - Industrial', 'Garagem - Distrito Industrial - Centro'),
-('04', 'Linha 04 - Norte / Sul', 'Terminal Norte - Shopping - Terminal Sul'),
-('05', 'Linha 05 - Expressa', 'Expressa - Rota Direta - Centro'),
-('06', 'Linha 06 - Periférica', 'Bairro Leste - Centro - Bairro Oeste');
+REPLACE INTO linhas_onibus (codigoLinha, nomeLinha, trajeto) VALUES 
+('E108', 'Linha E108 - Jd. Universo', 'Terminal Central - Av. Japão - Jd. Universo'),
+('C603', 'Linha C603 - Estrada Imperial', 'Terminal Central - Av. Voluntário F. Pinheiro Franco - Estrada Imperial'),
+('C602', 'Linha C602 - Botujuru', 'Terminal Central - R. Barão de Jaceguai - Botujuru'),
+('E203', 'Linha E203 - Cj. Santo Ângelo', 'Terminal Central - Av. Henrique Peres - Santo Ângelo'),
+('304', 'Linha 304 - Socorro', 'Terminal Central - R. Dr. Corrêa - Shopping Mogi'),
+('TESTE', 'Linha Teste - Residência', 'Base de Desenvolvimento - Mogi das Cruzes');
 
--- Inserção de Utilizadores de Teste (Comum e Administrador)
-INSERT INTO passageiros (nome, email, senha, tipo_usuario) VALUES 
-('Administrador Sistema', 'admin@monitor.com', 'admin123', 1),
-('Passageiro Teste', 'passageiro@monitor.com', '123456', 0);
+INSERT INTO pontos_itinerario (codigoLinha, nomePonto, latitude, longitude, ordem) VALUES
+('E108', 'Terminal Central', -23.523090, -46.185010, 1),
+('E108', 'Rua Doutor Deodato', -23.524510, -46.186520, 2),
+('E108', 'Rua Ipiranga', -23.526800, -46.188900, 3),
+('E108', 'Avenida Japão - Jd. Universo', -23.535010, -46.195030, 4),
+('C603', 'Terminal Central', -23.523090, -46.185010, 1),
+('C603', 'Avenida Voluntário Fernando Pinheiro Franco', -23.521100, -46.189500, 2),
+('C603', 'Rua Francisco Franco - Estrada Imperial', -23.515020, -46.192100, 3),
+('C602', 'Terminal Central', -23.523090, -46.185010, 1),
+('C602', 'Rua Barão de Jaceguai', -23.525100, -46.183200, 2),
+('C602', 'Botujuru', -23.501200, -46.170500, 3),
+('E203', 'Terminal Central', -23.523090, -46.185010, 1),
+('E203', 'Avenida Henrique Peres', -23.538100, -46.201500, 2),
+('E203', 'Conjunto Santo Ângelo', -23.545600, -46.210300, 3),
+('304', 'Terminal Central', -23.523090, -46.185010, 1),
+('304', 'Rua Doutor Corrêa', -23.521800, -46.182100, 2),
+('304', 'Shopping Mogi', -23.518500, -46.179000, 3),
+('TESTE', 'Ponto de Teste (Casa)', -23.4899488, -46.1450187, 1);
 
--- Inserção da Massa de Dados Histórica (Relatos entre 08/09/2026 e 19/09/2026 para a US 5.1)
-INSERT INTO relatos (codigoLinha, horario, nivelLotacao, status) VALUES 
--- Dia 08/09/2026
-('01', '2026-09-08 07:30:00', 'Lotado', 'Ativo'),
-('01', '2026-09-08 18:10:00', 'Lotado', 'Ativo'),
-('02', '2026-09-08 08:00:00', 'Moderado', 'Ativo'),
-('03', '2026-09-08 12:30:00', 'Vazio', 'Ativo'),
+-- ==========================================
+-- 3. MASSA DE DADOS ORDENADA CRONOLOGICAMENTE
+-- ==========================================
 
--- Dia 09/09/2026
-('01', '2026-09-09 07:40:00', 'Lotado', 'Ativo'),
-('04', '2026-09-09 17:50:00', 'Lotado', 'Ativo'),
-('05', '2026-09-09 13:15:00', 'Moderado', 'Ativo'),
+-- Limpeza preventiva para garantir ordenação limpa em caso de reexecução
+TRUNCATE TABLE relatos;
 
--- Dia 10/09/2026
-('02', '2026-09-10 07:20:00', 'Lotado', 'Ativo'),
-('03', '2026-09-10 18:30:00', 'Moderado', 'Ativo'),
-('06', '2026-09-10 08:15:00', 'Lotado', 'Ativo'),
+INSERT INTO relatos (codigoLinha, horario, nivelLotacao, status, idPassageiro) VALUES
 
--- Dia 11/09/2026
-('01', '2026-09-11 07:30:00', 'Lotado', 'Ativo'),
-('04', '2026-09-11 12:00:00', 'Vazio', 'Ativo'),
-('06', '2026-09-11 17:45:00', 'Lotado', 'Ativo'),
+-- ----------------- SETEMBRO 2026 -----------------
+('E108', '2026-09-08 06:30:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-09-08 07:15:00', 'Lotado', 'Ativo', 2),
+('E203', '2026-09-08 07:45:00', 'Lotado', 'Ativo', 11),
+('E203', '2026-09-08 10:30:00', 'Vazio', 'Ativo', 11),
+('C602', '2026-09-08 18:05:00', 'Lotado', 'Ativo', 2),
+('E108', '2026-09-08 22:15:00', 'Moderado', 'Ativo', 2),
+('E108', '2026-09-09 06:32:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-09-09 07:12:00', 'Lotado', 'Ativo', 2),
+('E108', '2026-09-09 07:30:00', 'Lotado', 'Ativo', 12),
+('304',  '2026-09-09 09:45:00', 'Vazio', 'Ativo', 13),
+('304',  '2026-09-09 09:45:00', 'Vazio', 'Ativo', 14),
+('E108', '2026-09-09 11:45:00', 'Moderado', 'Ativo', 12),
+('C603', '2026-09-09 12:40:00', 'Moderado', 'Ativo', 12),
+('304',  '2026-09-09 14:15:00', 'Moderado', 'Ativo', 13),
+('304',  '2026-09-09 14:15:00', 'Moderado', 'Ativo', 14),
+('C602', '2026-09-09 18:10:00', 'Lotado', 'Ativo', 2),
+('C603', '2026-09-09 18:20:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-09-09 22:10:00', 'Vazio', 'Ativo', 2),
+('E108', '2026-09-10 06:30:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-09-10 07:15:00', 'Lotado', 'Ativo', 2),
+('E203', '2026-09-10 07:50:00', 'Moderado', 'Ativo', 11),
+('E203', '2026-09-10 10:45:00', 'Vazio', 'Ativo', 11),
+('C602', '2026-09-10 18:05:00', 'Lotado', 'Ativo', 2),
+('E108', '2026-09-10 22:15:00', 'Moderado', 'Ativo', 2),
+('E108', '2026-09-11 06:35:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-09-11 07:20:00', 'Lotado', 'Ativo', 2),
+('E108', '2026-09-11 07:35:00', 'Lotado', 'Ativo', 12),
+('304',  '2026-09-11 10:10:00', 'Vazio', 'Ativo', 14),
+('E108', '2026-09-11 11:50:00', 'Moderado', 'Ativo', 12),
+('C603', '2026-09-11 12:45:00', 'Moderado', 'Ativo', 12),
+('304',  '2026-09-11 15:40:00', 'Vazio', 'Ativo', 13),
+('C602', '2026-09-11 18:00:00', 'Lotado', 'Ativo', 2),
+('C603', '2026-09-11 18:10:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-09-11 22:10:00', 'Vazio', 'Ativo', 2),
+('E108', '2026-09-12 06:40:00', 'Moderado', 'Ativo', 2),
+('C602', '2026-09-12 13:10:00', 'Moderado', 'Ativo', 2),
+('C603', '2026-09-12 23:30:00', 'Moderado', 'Ativo', 11),
+('C603', '2026-09-13 03:15:00', 'Vazio', 'Ativo', 11),
+('C603', '2026-09-13 04:15:00', 'Vazio', 'Ativo', 11),
+('E108', '2026-09-14 11:45:00', 'Moderado', 'Ativo', 12),
+('C603', '2026-09-14 18:15:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-09-15 06:30:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-09-15 07:15:00', 'Lotado', 'Ativo', 2),
+('E203', '2026-09-15 08:00:00', 'Moderado', 'Ativo', 11),
+('304',  '2026-09-15 09:20:00', 'Vazio', 'Ativo', 13),
+('304',  '2026-09-15 09:20:00', 'Vazio', 'Ativo', 14),
+('E203', '2026-09-15 10:50:00', 'Vazio', 'Ativo', 11),
+('304',  '2026-09-15 14:30:00', 'Moderado', 'Ativo', 14),
+('C602', '2026-09-15 18:05:00', 'Lotado', 'Ativo', 2),
+('E108', '2026-09-15 22:15:00', 'Vazio', 'Ativo', 2),
+('E108', '2026-09-16 06:30:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-09-16 07:15:00', 'Lotado', 'Ativo', 2),
+('E108', '2026-09-16 07:30:00', 'Lotado', 'Ativo', 12),
+('304',  '2026-09-16 09:45:00', 'Vazio', 'Ativo', 13),
+('E108', '2026-09-16 11:45:00', 'Moderado', 'Ativo', 12),
+('304',  '2026-09-16 15:15:00', 'Moderado', 'Ativo', 14),
+('C602', '2026-09-16 18:05:00', 'Lotado', 'Ativo', 2),
+('C603', '2026-09-16 18:20:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-09-16 22:15:00', 'Moderado', 'Ativo', 2),
+('E203', '2026-09-17 07:50:00', 'Lotado', 'Ativo', 11),
+('304',  '2026-09-17 09:30:00', 'Moderado', 'Ativo', 13),
+('E203', '2026-09-17 10:30:00', 'Vazio', 'Ativo', 11),
+('304',  '2026-09-17 15:45:00', 'Moderado', 'Ativo', 14),
+('C603', '2026-09-19 08:00:00', 'Moderado', 'Ativo', 12),
+('C603', '2026-09-21 18:15:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-09-22 06:35:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-09-22 07:10:00', 'Lotado', 'Ativo', 2),
+('E203', '2026-09-22 07:45:00', 'Lotado', 'Ativo', 11),
+('304',  '2026-09-22 09:45:00', 'Vazio', 'Ativo', 13),
+('E203', '2026-09-22 10:35:00', 'Vazio', 'Ativo', 11),
+('304',  '2026-09-22 14:15:00', 'Moderado', 'Ativo', 14),
+('C602', '2026-09-22 18:00:00', 'Lotado', 'Ativo', 2),
+('E108', '2026-09-22 22:10:00', 'Vazio', 'Ativo', 2),
+('E108', '2026-09-23 07:30:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-09-23 11:45:00', 'Moderado', 'Ativo', 12),
+('C603', '2026-09-23 18:20:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-09-24 06:35:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-09-24 07:10:00', 'Lotado', 'Ativo', 2),
+('E203', '2026-09-24 07:50:00', 'Lotado', 'Ativo', 11),
+('304',  '2026-09-24 10:10:00', 'Vazio', 'Ativo', 13),
+('E203', '2026-09-24 10:40:00', 'Vazio', 'Ativo', 11),
+('304',  '2026-09-24 15:40:00', 'Vazio', 'Ativo', 14),
+('C602', '2026-09-24 18:00:00', 'Lotado', 'Ativo', 2),
+('E108', '2026-09-24 22:10:00', 'Moderado', 'Ativo', 2),
+('E108', '2026-09-25 06:30:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-09-25 07:15:00', 'Lotado', 'Ativo', 2),
+('E108', '2026-09-25 07:35:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-09-25 11:50:00', 'Moderado', 'Ativo', 12),
+('C602', '2026-09-25 18:05:00', 'Lotado', 'Ativo', 2),
+('C603', '2026-09-25 18:10:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-09-25 22:15:00', 'Moderado', 'Ativo', 2),
+('C603', '2026-09-26 23:45:00', 'Moderado', 'Ativo', 11),
+('E108', '2026-09-27 14:30:00', 'Moderado', 'Ativo', 2),
+('C603', '2026-09-28 18:15:00', 'Lotado', 'Ativo', 12),
+('E203', '2026-09-29 08:00:00', 'Moderado', 'Ativo', 11),
+('304',  '2026-09-29 09:20:00', 'Vazio', 'Ativo', 13),
+('E203', '2026-09-29 10:45:00', 'Vazio', 'Ativo', 11),
+('304',  '2026-09-29 14:30:00', 'Moderado', 'Ativo', 14),
+('E108', '2026-09-30 06:30:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-09-30 07:15:00', 'Lotado', 'Ativo', 2),
 
--- Dia 12/09/2026 (Fim de semana)
-('03', '2026-09-12 10:00:00', 'Vazio', 'Ativo'),
-('05', '2026-09-12 14:30:00', 'Moderado', 'Ativo
-
--- Dia 15/09/2026
-('01', '2026-09-15 07:25:00', 'Lotado', 'Ativo'),
-('02', '2026-09-15 08:05:00', 'Lotado', 'Ativo'),
-('06', '2026-09-15 18:00:00', 'Lotado', 'Ativo'),
-
--- Dia 16/09/2026
-('03', '2026-09-16 07:50:00', 'Moderado', 'Ativo'),
-('04', '2026-09-16 17:30:00', 'Lotado', 'Ativo'),
-('05', '2026-09-16 12:10:00', 'Vazio', 'Ativo'),
-
--- Dia 17/09/2026
-('01', '2026-09-17 07:35:00', 'Lotado', 'Ativo'),
-('02', '2026-09-17 18:20:00', 'Lotado', 'Ativo'),
-('06', '2026-09-17 08:00:00', 'Moderado', 'Ativo'),
-
--- Dia 18/09/2026
-('03', '2026-09-18 07:45:00', 'Lotado', 'Ativo'),
-('04', '2026-09-18 13:00:00', 'Vazio', 'Ativo'),
-('05', '2026-09-18 17:55:00', 'Lotado', 'Ativo'),
-
--- Dia 19/09/2026
-('01', '2026-09-19 07:30:00', 'Lotado', 'Ativo'),
-('02', '2026-09-19 12:30:00', 'Moderado', 'Ativo'),
-('06', '2026-09-19 18:10:00', 'Lotado', 'Ativo');
-
-UPDATE passageiros SET tipo_usuario = 1 WHERE email = 'admin@monitor.com';
+-- ----------------- OUTUBRO 2026 -----------------
+('E108', '2026-10-01 06:30:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-10-01 07:15:00', 'Lotado', 'Ativo', 2),
+('E203', '2026-10-01 07:45:00', 'Lotado', 'Ativo', 11),
+('E203', '2026-10-01 10:30:00', 'Vazio', 'Ativo', 11),
+('C602', '2026-10-01 18:05:00', 'Lotado', 'Ativo', 2),
+('E108', '2026-10-01 22:15:00', 'Moderado', 'Ativo', 2),
+('E108', '2026-10-02 06:35:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-10-02 07:10:00', 'Lotado', 'Ativo', 2),
+('304',  '2026-10-02 09:45:00', 'Vazio', 'Ativo', 13),
+('304',  '2026-10-02 09:45:00', 'Vazio', 'Ativo', 14),
+('C603', '2026-10-02 12:30:00', 'Moderado', 'Ativo', 12),
+('304',  '2026-10-02 14:15:00', 'Moderado', 'Ativo', 13),
+('304',  '2026-10-02 14:15:00', 'Moderado', 'Ativo', 14),
+('C602', '2026-10-02 18:00:00', 'Lotado', 'Ativo', 2),
+('C603', '2026-10-02 18:10:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-10-02 22:10:00', 'Vazio', 'Ativo', 2),
+('E108', '2026-10-03 06:40:00', 'Moderado', 'Ativo', 2),
+('C602', '2026-10-03 13:10:00', 'Moderado', 'Ativo', 2),
+('E108', '2026-10-05 06:30:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-10-05 07:15:00', 'Lotado', 'Ativo', 2),
+('304',  '2026-10-05 10:10:00', 'Vazio', 'Ativo', 14),
+('304',  '2026-10-05 14:40:00', 'Vazio', 'Ativo', 13),
+('C602', '2026-10-05 18:05:00', 'Lotado', 'Ativo', 2),
+('C603', '2026-10-05 18:15:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-10-05 22:15:00', 'Moderado', 'Ativo', 2),
+('E108', '2026-10-06 06:32:00', 'Lotado', 'Ativo', 2),
+('C602', '2026-10-06 07:12:00', 'Lotado', 'Ativo', 2),
+('E203', '2026-10-06 07:50:00', 'Moderado', 'Ativo', 11),
+('E203', '2026-10-06 10:45:00', 'Vazio', 'Ativo', 11),
+('C602', '2026-10-06 18:10:00', 'Lotado', 'Ativo', 2),
+('E108', '2026-10-06 22:12:00', 'Vazio', 'Ativo', 2),
+('E108', '2026-10-07 07:30:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-10-07 11:45:00', 'Moderado', 'Ativo', 12),
+('C603', '2026-10-07 12:40:00', 'Moderado', 'Ativo', 12),
+('C603', '2026-10-07 18:20:00', 'Lotado', 'Ativo', 12),
+('E203', '2026-10-08 07:45:00', 'Lotado', 'Ativo', 11),
+('304',  '2026-10-08 10:10:00', 'Vazio', 'Ativo', 14),
+('E203', '2026-10-08 10:35:00', 'Vazio', 'Ativo', 11),
+('304',  '2026-10-08 15:40:00', 'Vazio', 'Ativo', 13),
+('E108', '2026-10-09 07:35:00', 'Lotado', 'Ativo', 12),
+('C603', '2026-10-09 18:10:00', 'Lotado', 'Ativo', 12),
+('C603', '2026-10-10 23:30:00', 'Moderado', 'Ativo', 11),
+('C603', '2026-10-12 18:15:00', 'Lotado', 'Ativo', 12),
+('E203', '2026-10-13 08:00:00', 'Moderado', 'Ativo', 11),
+('304',  '2026-10-13 09:20:00', 'Vazio', 'Ativo', 13),
+('304',  '2026-10-13 09:20:00', 'Vazio', 'Ativo', 14),
+('E203', '2026-10-13 10:50:00', 'Vazio', 'Ativo', 11),
+('304',  '2026-10-13 14:30:00', 'Moderado', 'Ativo', 14),
+('E108', '2026-10-14 07:35:00', 'Lotado', 'Ativo', 12),
+('E108', '2026-10-14 11:50:00', 'Moderado', 'Ativo', 12),
+('E203', '2026-10-15 07:50:00', 'Lotado', 'Ativo', 11),
+('304',  '2026-10-15 09:30:00', 'Moderado', 'Ativo', 13),
+('E203', '2026-10-15 10:40:00', 'Vazio', 'Ativo', 11),
+('304',  '2026-10-15 15:45:00', 'Moderado', 'Ativo', 14),
+('C603', '2026-10-17 22:30:00', 'Moderado', 'Ativo', 11),
+('C603', '2026-10-18 03:15:00', 'Vazio', 'Ativo', 11),
+('C603', '2026-10-18 04:15:00', 'Vazio', 'Ativo', 11),
+('E108', '2026-10-18 14:30:00', 'Moderado', 'Ativo', 2),
+('304',  '2026-10-20 09:20:00', 'Vazio', 'Ativo', 13),
+('304',  '2026-10-20 15:30:00', 'Moderado', 'Ativo', 14),
+('C603', '2026-10-24 08:00:00', 'Moderado', 'Ativo', 12),
+('E203', '2026-10-27 07:45:00', 'Lotado', 'Ativo', 11),
+('E203', '2026-10-27 10:35:00', 'Vazio', 'Ativo', 11),
+('304',  '2026-10-29 09:30:00', 'Moderado', 'Ativo', 13),
+('304',  '2026-10-29 15:45:00', 'Moderado', 'Ativo', 14);
