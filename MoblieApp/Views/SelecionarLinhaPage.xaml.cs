@@ -18,18 +18,19 @@ public partial class SelecionarLinhaPage : ContentPage
         // Linhas oficiais de Mogi das Cruzes e Linha de Teste alinhadas com o banco de dados
         var linhas = new List<LinhaOnibusModel>
         {
-            new LinhaOnibusModel { CodigoLinha = "E108", NomeLinha = "Linha E108 - Jd. Universo", Trajeto = "Terminal Central - Av. Japão - Jd. Universo" },
-            new LinhaOnibusModel { CodigoLinha = "C603", NomeLinha = "Linha C603 - Estrada Imperial", Trajeto = "Terminal Central - Av. Voluntário F. Pinheiro Franco - Estrada Imperial" },
-            new LinhaOnibusModel { CodigoLinha = "C602", NomeLinha = "Linha C602 - Botujuru", Trajeto = "Terminal Central - R. Barão de Jaceguai - Botujuru" },
-            new LinhaOnibusModel { CodigoLinha = "E203", NomeLinha = "Linha E203 - Cj. Santo Ângelo", Trajeto = "Terminal Central - Av. Henrique Peres - Santo Ângelo" },
-            new LinhaOnibusModel { CodigoLinha = "304",  NomeLinha = "Linha 304 - Socorro", Trajeto = "Terminal Central - R. Dr. Corrêa - Shopping Mogi" },
-            new LinhaOnibusModel { CodigoLinha = "TESTE", NomeLinha = "Linha Teste - Residência", Trajeto = "Base de Desenvolvimento - Mogi das Cruzes" }
+            new LinhaOnibusModel { CodigoLinha = "E108", NomeLinha = "Linha E108 - Jd. Universo" },
+            new LinhaOnibusModel { CodigoLinha = "C603", NomeLinha = "Linha C603 - Estrada Imperial" },
+            new LinhaOnibusModel { CodigoLinha = "C602", NomeLinha = "Linha C602 - Botujuru" },
+            new LinhaOnibusModel { CodigoLinha = "E203", NomeLinha = "Linha E203 - Cj. Santo Ângelo" },
+            new LinhaOnibusModel { CodigoLinha = "304",  NomeLinha = "Linha 304 - Socorro" },
+            new LinhaOnibusModel { CodigoLinha = "TESTE", NomeLinha = "Linha Teste - Residência" }
         };
 
         CollectionLinhas.ItemsSource = linhas;
     }
 
-    private async void OnLinhaSelected(object sender, SelectionChangedEventArgs e)
+    // Nome corrigido para coincidir exatamente com o SelectionChanged do XAML
+    private async void OnLinhaSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var linhaSelecionada = e.CurrentSelection.FirstOrDefault() as LinhaOnibusModel;
         if (linhaSelecionada == null)

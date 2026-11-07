@@ -74,6 +74,7 @@ public partial class AdminDashboardPage : ContentPage
     // 5. Nova Funcionalidade: Direcionar para a Tela de Gestão de Acessos
     private async void OnGerenciarAcessosClicked(object sender, EventArgs e)
     {
-        await Navigation.PushAsync(new AdminGerenciarUsuariosPage());
+        // Navega para a tela de gestão de perfis com os blocos de filtro
+        await Navigation.PushAsync(new GerenciarPerfisPage());
     }
 }

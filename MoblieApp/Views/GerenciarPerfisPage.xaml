@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonitorLotacaoApp.Views.GerenciarPerfisPage"
+             Title="Gestão de Acessos e Perfis"
+             BackgroundColor="#1E293B">
+
+    <VerticalStackLayout Padding="20" Spacing="15">
+
+        <!-- Título -->
+        <Label Text="Filtrar por Tipo de Perfil"
+               FontSize="22"
+               FontAttributes="Bold"
+               TextColor="#38BDF8"
+               HorizontalOptions="Center"/>
+
+        <Label Text="Selecione um bloco abaixo para visualizar apenas os utilizadores correspondentes."
+               FontSize="13"
+               TextColor="#94A3B8"
+               HorizontalOptions="Center"
+               HorizontalTextAlignment="Center"
+               Margin="0,0,0,10"/>
+
+        <!-- Bloco 1: Filtro Perfil Administrador -->
+        <Frame BackgroundColor="#334155"
+               BorderColor="#0284C7"
+               CornerRadius="10"
+               Padding="15"
+               HasShadow="True">
+            <Frame.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnFiltrarAdminTapped"/>
+            </Frame.GestureRecognizers>
+            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                <Label Text="🛡️" FontSize="28" VerticalOptions="Center"/>
+                <VerticalStackLayout>
+                    <Label Text="Perfil Administrador" FontSize="16" FontAttributes="Bold" TextColor="White"/>
+                    <Label Text="Gestores e órgãos de transporte" FontSize="12" TextColor="#94A3B8"/>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </Frame>
+
+        <!-- Bloco 2: Filtro Perfil Passageiro -->
+        <Frame BackgroundColor="#334155"
+               BorderColor="#059669"
+               CornerRadius="10"
+               Padding="15"
+               HasShadow="True">
+            <Frame.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnFiltrarPassageiroTapped"/>
+            </Frame.GestureRecognizers>
+            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                <Label Text="👤" FontSize="28" VerticalOptions="Center"/>
+                <VerticalStackLayout>
+                    <Label Text="Perfil Passageiro" FontSize="16" FontAttributes="Bold" TextColor="White"/>
+                    <Label Text="Utilizadores colaboradores do sistema" FontSize="12" TextColor="#94A3B8"/>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </Frame>
+
+        <!-- Indicador do Filtro Ativo -->
+        <Label x:Name="LblFiltroAtivo"
+               Text="A exibir: Todos os Utilizadores"
+               FontSize="14"
+               FontAttributes="Bold"
+               TextColor="#38BDF8"
+               Margin="0,10,0,0"/>
+
+        <!-- Lista de Utilizadores Filtrados com Botões de Ação (Editar e Excluir) -->
+        <CollectionView x:Name="CollectionUsuarios"
+                        HeightRequest="280">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BackgroundColor="White"
+                           BorderColor="#CBD5E1"
+                           CornerRadius="8"
+                           Padding="12"
+                           Margin="0,0,0,8">
+                        <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10" VerticalOptions="Center">
+
+                            <!-- Dados do Utilizador -->
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="{Binding nome}" FontSize="14" FontAttributes="Bold" TextColor="#1E293B"/>
+                                <Label Text="{Binding email}" FontSize="12" TextColor="#64748B"/>
+                            </VerticalStackLayout>
+
+                            <!-- Botão Editar -->
+                            <Button Grid.Column="1"
+                                    Text="✏️ Editar"
+                                    FontSize="12"
+                                    FontAttributes="Bold"
+                                    TextColor="White"
+                                    BackgroundColor="#D97706"
+                                    CornerRadius="6"
+                                    HeightRequest="36"
+                                    Padding="10,0"
+                                    CommandParameter="{Binding}"
+                                    Clicked="OnEditarUsuarioClicked"/>
+
+                            <!-- Botão Excluir -->
+                            <Button Grid.Column="2"
+                                    Text="🗑️ Excluir"
+                                    FontSize="12"
+                                    FontAttributes="Bold"
+                                    TextColor="White"
+                                    BackgroundColor="#DC2626"
+                                    CornerRadius="6"
+                                    HeightRequest="36"
+                                    Padding="10,0"
+                                    CommandParameter="{Binding}"
+                                    Clicked="OnExcluirUsuarioClicked"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </VerticalStackLayout>
+</ContentPage>

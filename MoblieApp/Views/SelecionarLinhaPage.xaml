@@ -3,33 +3,47 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MonitorLotacaoApp.Views.SelecionarLinhaPage"
              Title="Selecionar Linha de Ônibus"
-             BackgroundColor="#F5F6FA">
+             BackgroundColor="#2D3238">
 
-    <VerticalStackLayout Spacing="20" Padding="25">
+    <VerticalStackLayout Padding="20" Spacing="15">
 
         <Label Text="Escolha a sua linha"
                FontSize="22"
                FontAttributes="Bold"
-               HorizontalOptions="Center"
-               TextColor="#2C3E50"/>
+               TextColor="White"
+               HorizontalTextAlignment="Center" />
 
-        <Label Text="Selecione abaixo uma das 5 linhas monitoradas para prosseguir com o reporte de lotação:"
-               FontSize="14"
-               HorizontalOptions="Center"
+        <Label Text="Selecione abaixo uma das 5 linhas monitoradas para prosseguir com o reporte de lotação."
+               FontSize="13"
+               TextColor="#B0BEC5"
                HorizontalTextAlignment="Center"
-               TextColor="#7F8C8D"/>
+               Margin="0,0,0,10"/>
 
-        <!-- Lista de Linhas de Ônibus (Escopo do TCC) -->
-        <CollectionView x:Name="CollectionLinhas" SelectionMode="Single" SelectionChanged="OnLinhaSelected">
+        <!-- Lista das 5 Linhas Oficiais -->
+        <CollectionView x:Name="CollectionLinhas"
+                        SelectionMode="Single"
+                        SelectionChanged="OnLinhaSelectionChanged">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <!-- O Frame ou Border atua como a área sensível ao toque -->
-                    <Border Stroke="#E0E0E0" StrokeThickness="1" StrokeShape="RoundRectangle 12" BackgroundColor="White" Padding="15" Margin="0,5">
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="{Binding NomeLinha}" FontSize="18" FontAttributes="Bold" TextColor="#0056b3"/>
-                            <Label Text="{Binding Trajeto}" FontSize="13" TextColor="#666666"/>
-                        </VerticalStackLayout>
-                    </Border>
+                    <VerticalStackLayout Padding="15" BackgroundColor="#37474F" Spacing="4">
+                        <VerticalStackLayout.Margin>
+                            <OnPlatform x:TypeArguments="Thickness">
+                                <On Platform="iOS, Android" Value="0,5,0,5"/>
+                                <On Platform="WinUI" Value="0,2,0,2"/>
+                            </OnPlatform>
+                        </VerticalStackLayout.Margin>
+
+                        <!-- Nome da Linha com Fonte Aumentada e Negrito -->
+                        <Label Text="{Binding NomeLinha}"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#90CAF9" />
+
+                        <!-- Trajeto / Descrição -->
+                        <Label Text="{Binding Trajeto}"
+                               FontSize="13"
+                               TextColor="#CFD8DC" />
+                    </VerticalStackLayout>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

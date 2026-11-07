@@ -2,64 +2,81 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MonitorLotacaoApp.Views.LoginPage"
-             Title="Autenticação">
+             Title="Acesso ao Sistema"
+             BackgroundColor="#2D3238">
 
     <ScrollView>
         <VerticalStackLayout Padding="30" Spacing="20" VerticalOptions="Center">
 
-            <!-- Título Principal -->
+            <!-- Título do Aplicativo -->
             <Label Text="Monitor de Lotação"
-                   FontSize="28"
+                   FontSize="26"
                    FontAttributes="Bold"
-                   HorizontalOptions="Center"
-                   TextColor="#1b6ca8" />
+                   TextColor="White"
+                   HorizontalTextAlignment="Center" />
 
-            <Label Text="Faça login ou cadastre-se para continuar"
-                   FontSize="14"
-                   HorizontalOptions="Center"
-                   TextColor="Gray"
-                   Margin="0,0,0,20"/>
+            <Label Text="Faça login ou cadastre-se para colaborar"
+                   FontSize="13"
+                   TextColor="#90A4AE"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,20" />
 
-            <!-- Campos de Entrada -->
-            <Entry x:Name="TxtNome"
-                   Placeholder="Nome completo (apenas para cadastro)"
-                   ClearButtonVisibility="WhileEditing" />
-
+            <!-- Campo E-mail -->
             <Entry x:Name="TxtEmail"
-                   Placeholder="E-mail profissional ou pessoal"
+                   Placeholder="E-mail institucional ou pessoal"
+                   PlaceholderColor="#90A4AE"
+                   TextColor="White"
+                   BackgroundColor="#37474F"
                    Keyboard="Email"
-                   ClearButtonVisibility="WhileEditing" />
+                   HeightRequest="50" />
 
+            <!-- Campo Senha -->
             <Entry x:Name="TxtSenha"
-                   Placeholder="Senha de acesso (mín. 6 caracteres)"
+                   Placeholder="Senha de acesso"
+                   PlaceholderColor="#90A4AE"
+                   TextColor="White"
+                   BackgroundColor="#37474F"
                    IsPassword="True"
-                   ClearButtonVisibility="WhileEditing" />
+                   HeightRequest="50" />
 
-            <!-- Botões de Ação -->
-            <Button x:Name="BtnEntrar"
-                    Text="Entrar"
-                    BackgroundColor="#1b6ca8"
+            <!-- Botão de Esqueci a Senha / Redefinir -->
+            <Button Text="Esqueci minha senha?"
+                    BackgroundColor="Transparent"
+                    TextColor="#90CAF9"
+                    FontSize="13"
+                    HorizontalOptions="End"
+                    Padding="0"
+                    Margin="0,-10,0,5"
+                    Clicked="OnRedefinirSenhaClicked" />
+
+            <!-- Botão Entrar -->
+            <Button Text="Entrar"
+                    BackgroundColor="#1976D2"
                     TextColor="White"
-                    CornerRadius="8"
-                    HeightRequest="50"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HeightRequest="55"
+                    CornerRadius="10"
                     Clicked="OnEntrarClicked" />
 
-            <Button x:Name="BtnCadastrar"
-                    Text="Cadastrar Nova Conta"
-                    BackgroundColor="#28a745"
-                    TextColor="White"
-                    CornerRadius="8"
-                    HeightRequest="50"
-                    Clicked="OnCadastrarClicked" />
+            <!-- Divisor visual -->
+            <BoxView HeightRequest="1" Color="#455A64" Margin="0,10" />
 
-            <!-- Botão do Tópico 1: Redefinição de Senha -->
-            <Button x:Name="BtnRedefinir"
-                    Text="Esqueci / Redefinir Senha"
-                    BackgroundColor="#f0ad4e"
+            <!-- Texto auxiliar para novos usuários -->
+            <Label Text="Ainda não tem uma conta?"
+                   FontSize="13"
+                   TextColor="#B0BEC5"
+                   HorizontalTextAlignment="Center" />
+
+            <!-- Botão Cadastrar Nova Conta (Aponta para OnIrParaCadastroClicked) -->
+            <Button Text="Cadastrar Nova Conta"
+                    BackgroundColor="#2E7D32"
                     TextColor="White"
-                    CornerRadius="8"
-                    HeightRequest="45"
-                    Clicked="OnRedefinirSenhaClicked" />
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HeightRequest="55"
+                    CornerRadius="10"
+                    Clicked="OnIrParaCadastroClicked" />
 
         </VerticalStackLayout>
     </ScrollView>

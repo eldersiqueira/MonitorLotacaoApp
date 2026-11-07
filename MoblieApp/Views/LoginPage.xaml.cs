@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using MonitorLotacaoApp.Models;
 using MonitorLotacaoApp.Services;
 using MonitorLotacaoApp.Views;
 
@@ -16,8 +17,9 @@ public partial class LoginPage : ContentPage
 
     private async void OnEntrarClicked(object sender, EventArgs e)
     {
-        string email = TxtEmail.Text?.Trim();
-        string senha = TxtSenha.Text;
+        // Higienização profunda: remove espaços em branco antes, depois e quaisquer espaços internos acidentais
+        string email = TxtEmail.Text?.Trim().Replace(" ", "") ?? string.Empty;
+        string senha = TxtSenha.Text ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
         {
@@ -33,6 +35,7 @@ public partial class LoginPage : ContentPage
 
         try
         {
+            // Validação com o serviço de API / Base de dados estruturada no TCC
             LoginResponse resultado = await _apiService.RealizarLoginRealAsync(email, senha);
 
             if (resultado != null && resultado.sucesso)
@@ -41,7 +44,7 @@ public partial class LoginPage : ContentPage
 
                 int tipoUsuario = resultado.tipo_usuario ?? 0;
 
-                // Redirecionamento correto: Administrador vai para o Painel do ADM
+                // Redirecionamento correto conforme o perfil: Administrador (1) ou Passageiro (0)
                 if (tipoUsuario == 1)
                 {
                     await Navigation.PushAsync(new AdminDashboardPage());
@@ -60,52 +63,6 @@ public partial class LoginPage : ContentPage
         catch (Exception ex)
         {
             await DisplayAlert("Erro", $"Ocorreu um erro na conexão: {ex.Message}", "OK");
-        }
-    }
-
-    private async void OnCadastrarClicked(object sender, EventArgs e)
-    {
-        string nome = TxtNome.Text?.Trim();
-        string email = TxtEmail.Text?.Trim();
-        string senha = TxtSenha.Text;
-
-        if (string.IsNullOrWhiteSpace(nome) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
-        {
-            await DisplayAlert("Atenção", "Preencha todos os campos (Nome, E-mail e Senha) para realizar o cadastro.", "OK");
-            return;
-        }
-
-        if (!ValidarFormatoEmail(email))
-        {
-            await DisplayAlert("Formato Inválido", "Digite um endereço de e-mail válido para o cadastro.", "OK");
-            return;
-        }
-
-        if (senha.Length < 6)
-        {
-            await DisplayAlert("Segurança da Senha", "A senha deve conter no mínimo 6 caracteres.", "OK");
-            return;
-        }
-
-        try
-        {
-            bool cadastrado = await _apiService.CadastrarPassageiroAsync(nome, email, senha);
-
-            if (cadastrado)
-            {
-                await DisplayAlert("Sucesso", "Registo efetuado com sucesso no MySQL!", "OK");
-                TxtNome.Text = string.Empty;
-                TxtEmail.Text = string.Empty;
-                TxtSenha.Text = string.Empty;
-            }
-            else
-            {
-                await DisplayAlert("Erro", "Não foi possível efetuar o registo. O e-mail pode já estar em uso.", "OK");
-            }
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Erro", $"Exceção ao cadastrar: {ex.Message}", "OK");
         }
     }
 
@@ -131,13 +88,19 @@ public partial class LoginPage : ContentPage
 
         if (sucesso)
         {
-            await DisplayAlert("Sucesso", "Senha redefinida com sucesso no MySQL!", "OK");
+            await DisplayAlert("Sucesso", "Senha redefinida com sucesso!", "OK");
             TxtSenha.Text = string.Empty;
         }
         else
         {
             await DisplayAlert("Erro", "Não foi possível redefinir a senha. Verifique se o e-mail está cadastrado.", "OK");
         }
+    }
+
+    private async void OnIrParaCadastroClicked(object sender, EventArgs e)
+    {
+        // Navega para a tela dedicada de cadastro de passageiro
+        await Navigation.PushAsync(new CadastroPage());
     }
 
     private bool ValidarFormatoEmail(string email)

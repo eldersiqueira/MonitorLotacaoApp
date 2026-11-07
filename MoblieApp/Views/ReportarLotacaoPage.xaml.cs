@@ -1,128 +1,159 @@
-﻿using Microsoft.Maui.Devices.Sensors;
-using MonitorLotacaoApp.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using MonitorLotacaoApp.Services;
 
 namespace MonitorLotacaoApp.Views;
 
 public partial class ReportarLotacaoPage : ContentPage
 {
     private readonly string _codigoLinha;
+    private readonly string _nomeLinha;
     private readonly ApiService _apiService;
-    private List<PontoItinerarioDto> _listaPontosLinha = new();
 
     public ReportarLotacaoPage(string codigoLinha, string nomeLinha)
     {
         InitializeComponent();
         _codigoLinha = codigoLinha;
+        _nomeLinha = nomeLinha;
         _apiService = new ApiService();
 
-        if (lblNomeLinha != null)
-            lblNomeLinha.Text = nomeLinha;
-
-        CarregarItinerarioDaLinha();
+        // Exibe o nome da linha no topo para clareza do usuário
+        LblNomeLinha.Text = _nomeLinha ?? $"Linha: {_codigoLinha}";
     }
 
-    private async void CarregarItinerarioDaLinha()
+    private async void OnVazioClicked(object sender, EventArgs e)
     {
-        // Busca todos os pontos cadastrados no MySQL para esta linha específica
-        var pontos = await _apiService.ObterItinerarioAsync(_codigoLinha);
-        if (pontos != null && pontos.Count > 0)
-        {
-            _listaPontosLinha = pontos;
-        }
-        else if (_codigoLinha == "TESTE")
-        {
-            // Fallback exclusivo para a linha TESTE caso a API falhe na sua casa
-            _listaPontosLinha = new List<PontoItinerarioDto>
-            {
-                new PontoItinerarioDto { nomePonto = "Casa (Teste)", latitude = -23.5394, longitude = -46.2167 }
-            };
-        }
+        await ProcessarRelatorioAsync("Vazio");
     }
 
-    private async Task<bool> ValidarPresencaNoPontoAsync()
+    private async void OnModeradoClicked(object sender, EventArgs e)
     {
-        if (_listaPontosLinha == null || _listaPontosLinha.Count == 0)
+        await ProcessarRelatorioAsync("Moderado");
+    }
+
+    private async void OnLotadoClicked(object sender, EventArgs e)
+    {
+        await ProcessarRelatorioAsync("Lotado");
+    }
+
+    private async Task ProcessarRelatorioAsync(string nivelLotacao)
+    {
+        // 1. Validação de Geolocalização nativa utilizando os pontos do banco de dados (US 1.2)[cite: 5, 13, 34]
+        bool gpsValido = await ValidarDispositivoGPSAsync();
+        if (!gpsValido)
         {
-            await DisplayAlert("Aguarde", "Carregando itinerário do servidor ou linha sem pontos cadastrados.", "OK");
-            return false;
+            return;
         }
 
         try
         {
-            var request = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(15));
-            var location = await Geolocation.Default.GetLocationAsync(request);
+            bool confirmado = await DisplayAlert("Confirmação de Reporte",
+                $"Deseja registrar o nível [{nivelLotacao}] para a {_nomeLinha}?", "Enviar", "Cancelar");
 
-            if (location != null)
+            if (!confirmado) return;
+
+            // Envio do relato via ApiService estruturado para o backend MySQL[cite: 6]
+            bool sucesso = await _apiService.EnviarRelatoAsync(_codigoLinha, nivelLotacao);
+
+            if (sucesso)
             {
-                bool estaNoTrajeto = false;
-                double menorDistanciaKm = double.MaxValue;
-
-                // Percorre todos os pontos da linha selecionada para verificar se o usuário está próximo de algum deles (Raio de 150m / 0.15km)
-                foreach (var ponto in _listaPontosLinha)
-                {
-                    double distanciaKm = Location.CalculateDistance(
-                        location.Latitude, location.Longitude,
-                        ponto.latitude, ponto.longitude,
-                        DistanceUnits.Kilometers);
-
-                    if (distanciaKm < menorDistanciaKm)
-                        menorDistanciaKm = distanciaKm;
-
-                    if (distanciaKm <= 0.15)
-                    {
-                        estaNoTrajeto = true;
-                        break;
-                    }
-                }
-
-                if (estaNoTrajeto)
-                {
-                    return true;
-                }
-
-                // Se o usuário estiver longe de todos os pontos da linha escolhida, bloqueia o envio!
-                await DisplayAlert("Fora de Alcance", $"Você está a {Math.Round(menorDistanciaKm * 1000, 0)} metros do trajeto da linha {_codigoLinha}. O reporte só é permitido próximo aos pontos oficiais.", "OK");
-                return false;
-            }
-            else
-            {
-                await DisplayAlert("GPS Indisponível", "Não foi possível capturar a sua localização via satélite/GPS.", "OK");
-            }
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Erro de Sensor", $"Falha na geolocalização: {ex.Message}", "OK");
-        }
-
-        return false;
-    }
-
-    private async void OnVazioClicked(object sender, EventArgs e) => await ProcessarRelatorioAsync("Vazio");
-    private async void OnModeradoClicked(object sender, EventArgs e) => await ProcessarRelatorioAsync("Moderado");
-    private async void OnLotadoClicked(object sender, EventArgs e) => await ProcessarRelatorioAsync("Lotado");
-
-    private async Task ProcessarRelatorioAsync(string nivelLotacao)
-    {
-        bool usuarioNoPonto = await ValidarPresencaNoPontoAsync();
-
-        if (usuarioNoPonto)
-            {
-            
-            bool inseridoMySQL = await _apiService.EnviarRelatoAsync(_codigoLinha, nivelLotacao);
-
-            if (inseridoMySQL)
-            {
-                await DisplayAlert("Sucesso", $"Relato '{nivelLotacao}' enviado com sucesso para a linha {_codigoLinha}!", "OK");
+                await DisplayAlert("Sucesso", "Relatório enviado e validado com sucesso! Obrigado por colaborar com o transporte.", "OK");
                 await Navigation.PopAsync();
             }
             else
             {
-                await DisplayAlert("Erro", "Falha ao gravar o relato no servidor MySQL.", "OK");
+                await DisplayAlert("Aviso", "Sem conexão com o servidor. O relato foi salvo localmente no SQLite para sincronização posterior.", "OK");
+                await Navigation.PopAsync();
             }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Erro", $"Não foi possível processar o relato: {ex.Message}", "OK");
+        }
+    }
+
+    // Validação avançada por Geolocalização dinâmica consultando a tabela pontos_itinerario
+    private async Task<bool> ValidarDispositivoGPSAsync()
+    {
+        try
+        {
+            var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+
+            if (status != PermissionStatus.Granted)
+            {
+                status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+            }
+
+            if (status != PermissionStatus.Granted)
+            {
+                await DisplayAlert("Permissão Negada", "O aplicativo precisa da localização ativada para validar o relato a bordo do veículo.", "OK");
+                return false;
+            }
+
+            var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
+            var location = await Geolocation.GetLocationAsync(request) ?? await Geolocation.GetLastKnownLocationAsync();
+
+            if (location == null)
+            {
+                await DisplayAlert("GPS Indisponível", "Não foi possível capturar sua coordenada atual. Verifique o sinal de GPS.", "OK");
+                return false;
+            }
+
+            // 1. Busca os pontos do itinerário da linha selecionada diretamente no MySQL via API PHP[cite: 5]
+            List<PontoItinerarioDto> pontosItinerario = await _apiService.ObterItinerarioAsync(_codigoLinha);
+
+            // Fallback para testes locais offline caso a API não responda
+            if (pontosItinerario == null || pontosItinerario.Count == 0)
+            {
+                if (_codigoLinha?.ToUpper() == "TESTE")
+                {
+                    pontosItinerario = new List<PontoItinerarioDto>
+                    {
+                        new PontoItinerarioDto { latitude = -23.5394, longitude = -46.2167 }
+                    };
+                }
+                else
+                {
+                    await DisplayAlert("Aviso de Rota", "Não foi possível carregar os pontos de itinerário desta linha para validação GPS.", "OK");
+                    return false;
+                }
+            }
+
+            // 2. Verifica se o usuário está a menos de 100 metros (0.1 km) de QUALQUER ponto da linha
+            double raioToleranciaKm = 0.1;
+            bool estaNoTrajeto = false;
+            double menorDistanciaEncontradaKm = double.MaxValue;
+
+            foreach (var ponto in pontosItinerario)
+            {
+                var pontoReferencia = new Location(ponto.latitude, ponto.longitude);
+                double distanciaKm = location.CalculateDistance(pontoReferencia, DistanceUnits.Kilometers);
+
+                if (distanciaKm < menorDistanciaEncontradaKm)
+                {
+                    menorDistanciaEncontradaKm = distanciaKm;
+                }
+
+                if (distanciaKm <= raioToleranciaKm)
+                {
+                    estaNoTrajeto = true;
+                    break;
+                }
+            }
+
+            // 3. Rejeita o relato se estiver fora do raio de todos os pontos cadastrados[cite: 13, 34]
+            if (!estaNoTrajeto)
+            {
+                double menorDistanciaMetros = menorDistanciaEncontradaKm * 1000;
+                await DisplayAlert("Fora do Trajeto",
+                    $"Validação de GPS recusada! Você está a aproximadamente {menorDistanciaMetros:F0} metros do ponto mais próximo da {_nomeLinha}. O relato exige proximidade máxima de 100 metros.", "OK");
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Erro de Hardware", $"Falha ao validar a geolocalização: {ex.Message}", "OK");
+            return false;
         }
     }
 }
