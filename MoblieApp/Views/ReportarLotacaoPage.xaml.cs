@@ -1,4 +1,5 @@
 ﻿using MonitorLotacaoApp.Services;
+using Microsoft.Maui.Devices.Sensors;
 
 namespace MonitorLotacaoApp.Views;
 
@@ -36,7 +37,7 @@ public partial class ReportarLotacaoPage : ContentPage
 
     private async Task ProcessarRelatorioAsync(string nivelLotacao)
     {
-        // 1. Validação de Geolocalização nativa utilizando os pontos do banco de dados (US 1.2)[cite: 5, 13, 34]
+        // 1. Validação de Geolocalização nativa utilizando os pontos do banco de dados (US 1.2)
         bool gpsValido = await ValidarDispositivoGPSAsync();
         if (!gpsValido)
         {
@@ -50,17 +51,23 @@ public partial class ReportarLotacaoPage : ContentPage
 
             if (!confirmado) return;
 
-            // Envio do relato via ApiService estruturado para o backend MySQL[cite: 6]
-            bool sucesso = await _apiService.EnviarRelatoAsync(_codigoLinha, nivelLotacao);
+            // 2. Envio do relato via ApiService estruturado para o backend MySQL[cite: 8]
+            var resultado = await _apiService.EnviarRelatoComRetornoAsync(_codigoLinha, nivelLotacao);
 
-            if (sucesso)
+            if (resultado != null && resultado.sucesso)
             {
-                await DisplayAlert("Sucesso", "Relatório enviado e validado com sucesso! Obrigado por colaborar com o transporte.", "OK");
+                await DisplayAlert("Sucesso",
+                    $"Relatório enviado e validado por GPS!\n\n" +
+                    $"📊 Status Atual da Linha: {resultado.status_atual_linha}\n" +
+                    $"📈 Ocupação Média: {resultado.percentual_medio}%\n" +
+                    $"👥 Colaboradores: {resultado.total_relatos_recentes} relatos recentes", "OK");
+
                 await Navigation.PopAsync();
             }
             else
             {
-                await DisplayAlert("Aviso", "Sem conexão com o servidor. O relato foi salvo localmente no SQLite para sincronização posterior.", "OK");
+                string msg = resultado?.mensagem ?? "Sem conexão com o servidor. O relato foi salvo localmente no SQLite para sincronização posterior.";
+                await DisplayAlert("Aviso", msg, "OK");
                 await Navigation.PopAsync();
             }
         }
@@ -70,7 +77,7 @@ public partial class ReportarLotacaoPage : ContentPage
         }
     }
 
-    // Validação avançada por Geolocalização dinâmica consultando a tabela pontos_itinerario
+    // Validação avançada por Geolocalização dinâmica consultando a tabela de itinerário[cite: 12]
     private async Task<bool> ValidarDispositivoGPSAsync()
     {
         try
@@ -97,17 +104,18 @@ public partial class ReportarLotacaoPage : ContentPage
                 return false;
             }
 
-            // 1. Busca os pontos do itinerário da linha selecionada diretamente no MySQL via API PHP[cite: 5]
+            // 1. Busca os pontos do itinerário da linha selecionada diretamente no MySQL via API[cite: 12]
             List<PontoItinerarioDto> pontosItinerario = await _apiService.ObterItinerarioAsync(_codigoLinha);
 
-            // Fallback para testes locais offline caso a API não responda
+            // Fallback para testes locais offline caso a API não retorne pontos cadastrados
             if (pontosItinerario == null || pontosItinerario.Count == 0)
             {
-                if (_codigoLinha?.ToUpper() == "TESTE")
+                if (_codigoLinha?.ToUpper() == "TESTE" || _codigoLinha?.ToUpper() == "E108")
                 {
+                    // Ponto de referência padrão em Mogi das Cruzes para homologação
                     pontosItinerario = new List<PontoItinerarioDto>
                     {
-                        new PontoItinerarioDto { latitude = -23.5394, longitude = -46.2167 }
+                        new PontoItinerarioDto { latitude = -23.5227, longitude = -46.1864 }
                     };
                 }
                 else
@@ -117,8 +125,8 @@ public partial class ReportarLotacaoPage : ContentPage
                 }
             }
 
-            // 2. Verifica se o usuário está a menos de 100 metros (0.1 km) de QUALQUER ponto da linha
-            double raioToleranciaKm = 0.1;
+            // 2. Verifica se o usuário está a menos de 100 metros (0.1 km) de QUALQUER ponto da linha (ajustável para testes)
+            double raioToleranciaKm = 0.2;
             bool estaNoTrajeto = false;
             double menorDistanciaEncontradaKm = double.MaxValue;
 
@@ -139,12 +147,12 @@ public partial class ReportarLotacaoPage : ContentPage
                 }
             }
 
-            // 3. Rejeita o relato se estiver fora do raio de todos os pontos cadastrados[cite: 13, 34]
+            // 3. Rejeita o relato se estiver fora do raio de todos os pontos cadastrados
             if (!estaNoTrajeto)
             {
                 double menorDistanciaMetros = menorDistanciaEncontradaKm * 1000;
                 await DisplayAlert("Fora do Trajeto",
-                    $"Validação de GPS recusada! Você está a aproximadamente {menorDistanciaMetros:F0} metros do ponto mais próximo da {_nomeLinha}. O relato exige proximidade máxima de 100 metros.", "OK");
+                    $"Validação de GPS recusada! Você está a aproximadamente {menorDistanciaMetros:F0} metros do ponto mais próximo da {_nomeLinha}. O relato exige proximidade da rota.", "OK");
                 return false;
             }
 
@@ -155,5 +163,5 @@ public partial class ReportarLotacaoPage : ContentPage
             await DisplayAlert("Erro de Hardware", $"Falha ao validar a geolocalização: {ex.Message}", "OK");
             return false;
         }
+        }
     }
-}

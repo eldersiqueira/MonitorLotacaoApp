@@ -4,24 +4,18 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Maui.Storage;
 
-namespace MonitorLotacaoApp.Services 
-{ 
-
-    public class PontoItinerarioDto
+namespace MonitorLotacaoApp.Services
 {
-    public int idPonto { get; set; }
-    public string nomePonto { get; set; }
-    public double latitude { get; set; }
-    public double longitude { get; set; }
-}
-
+    // DTOs para mapeamento dos retornos da API
     public class LoginResponse
     {
         public bool sucesso { get; set; }
         public string mensagem { get; set; }
         public int? tipo_usuario { get; set; }
         public string nome { get; set; }
+        public int idPassageiro { get; set; }
     }
 
     public class ApiResponse
@@ -38,6 +32,36 @@ namespace MonitorLotacaoApp.Services
         public int tipo_usuario { get; set; }
     }
 
+    public class EstatisticasAdminResponse
+    {
+        public bool sucesso { get; set; }
+        public int totalRelatos { get; set; }
+        public List<HorarioCriticoDto> horariosCriticos { get; set; }
+    }
+
+    public class HorarioCriticoDto
+    {
+        public int hora { get; set; }
+        public int quantidade { get; set; }
+    }
+
+    public class RelatoResponseDto
+    {
+        public bool sucesso { get; set; }
+        public string mensagem { get; set; }
+        public string status_atual_linha { get; set; }
+        public int percentual_medio { get; set; }
+        public int total_relatos_recentes { get; set; }
+    }
+
+    public class PontoItinerarioDto
+    {
+        public int idPonto { get; set; }
+        public string nomePonto { get; set; }
+        public double latitude { get; set; }
+        public double longitude { get; set; }
+    }
+
     public class ApiService
     {
         private readonly HttpClient _httpClient;
@@ -49,6 +73,7 @@ namespace MonitorLotacaoApp.Services
             _httpClient.Timeout = TimeSpan.FromSeconds(15);
         }
 
+        // --- AUTENTICAÇÃO ---
         public async Task<LoginResponse> RealizarLoginRealAsync(string email, string senha)
         {
             try
@@ -64,18 +89,15 @@ namespace MonitorLotacaoApp.Services
                 if (resposta.IsSuccessStatusCode)
                 {
                     string retornoJson = await resposta.Content.ReadAsStringAsync();
-                    var resultado = JsonSerializer.Deserialize<LoginResponse>(retornoJson, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-                    return resultado ?? new LoginResponse { sucesso = false, mensagem = "Erro ao processar resposta." };
+                    return JsonSerializer.Deserialize<LoginResponse>(retornoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                           ?? new LoginResponse { sucesso = false, mensagem = "Erro ao processar resposta." };
                 }
-                return new LoginResponse { sucesso = false, mensagem = "Servidor retornou erro HTTP." };
             }
             catch (Exception ex)
             {
                 return new LoginResponse { sucesso = false, mensagem = $"Falha de conexão: {ex.Message}" };
             }
+            return new LoginResponse { sucesso = false, mensagem = "Servidor retornou erro HTTP." };
         }
 
         public async Task<bool> CadastrarPassageiroAsync(string nome, string email, string senha)
@@ -94,10 +116,7 @@ namespace MonitorLotacaoApp.Services
                 if (resposta.IsSuccessStatusCode)
                 {
                     string retornoJson = await resposta.Content.ReadAsStringAsync();
-                    var resultado = JsonSerializer.Deserialize<ApiResponse>(retornoJson, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+                    var resultado = JsonSerializer.Deserialize<ApiResponse>(retornoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     return resultado != null && resultado.sucesso;
                 }
             }
@@ -118,10 +137,7 @@ namespace MonitorLotacaoApp.Services
                 if (resposta.IsSuccessStatusCode)
                 {
                     string retornoJson = await resposta.Content.ReadAsStringAsync();
-                    var resultado = JsonSerializer.Deserialize<ApiResponse>(retornoJson, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+                    var resultado = JsonSerializer.Deserialize<ApiResponse>(retornoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     return resultado != null && resultado.sucesso;
                 }
             }
@@ -132,32 +148,38 @@ namespace MonitorLotacaoApp.Services
             return false;
         }
 
-        public async Task<bool> EnviarRelatoAsync(string codigoLinha, string nivelLotacao)
+        // --- RELATOS E GEOLOCALIZAÇÃO (US 1.2) ---
+        public async Task<RelatoResponseDto> EnviarRelatoComRetornoAsync(string codigoLinha, string nivelLotacao)
         {
             try
             {
+                // Recupera o idPassageiro armazenado na sessão local durante o login
+                int idPassageiroLogado = Preferences.Get("idPassageiro", 0);
+
                 var parametros = new Dictionary<string, string>
-        {
-            { "CodigoLinha", codigoLinha },
-            { "NivelLotacao", nivelLotacao },
-            { "Horario", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") },
-            { "Status", "Ativo" }
-        };
+                {
+                    { "CodigoLinha", codigoLinha },
+                    { "NivelLotacao", nivelLotacao },
+                    { "idPassageiro", idPassageiroLogado.ToString() }, // Garante que o ID do passageiro vai preenchido no MySQL
+                    { "Horario", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") },
+                    { "Status", "Ativo" }
+                };
+
                 var conteudo = new FormUrlEncodedContent(parametros);
                 var resposta = await _httpClient.PostAsync($"{BaseUrl}sincronizar.php", conteudo);
 
                 if (resposta.IsSuccessStatusCode)
                 {
                     string retornoJson = await resposta.Content.ReadAsStringAsync();
-                    var resultado = JsonSerializer.Deserialize<ApiResponse>(retornoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return resultado != null && resultado.sucesso;
+                    return JsonSerializer.Deserialize<RelatoResponseDto>(retornoJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                           ?? new RelatoResponseDto { sucesso = false, mensagem = "Erro ao processar resposta." };
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao sincronizar relato: {ex.Message}");
             }
-            return false;
+            return new RelatoResponseDto { sucesso = false, mensagem = "Falha de conexão com a API." };
         }
 
         public async Task<List<PontoItinerarioDto>> ObterItinerarioAsync(string codigoLinha)
@@ -173,10 +195,8 @@ namespace MonitorLotacaoApp.Services
                     if (resultado != null && resultado.ContainsKey("sucesso") && resultado["sucesso"].ToString() == "True")
                     {
                         var arrayPontos = ((JsonElement)resultado["itinerario"]).GetRawText();
-                        return JsonSerializer.Deserialize<List<PontoItinerarioDto>>(arrayPontos, new JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true
-                        });
+                        return JsonSerializer.Deserialize<List<PontoItinerarioDto>>(arrayPontos, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                               ?? new List<PontoItinerarioDto>();
                     }
                 }
             }
@@ -187,7 +207,24 @@ namespace MonitorLotacaoApp.Services
             return new List<PontoItinerarioDto>();
         }
 
-        // --- GESTÃO DE ACESSOS (PERFIL ADM) ---
+        // --- PAINEL ADMINISTRATIVO E GESTÃO DE PERFIS ---
+        public async Task<EstatisticasAdminResponse> ObterEstatisticasAsync()
+        {
+            try
+            {
+                var resposta = await _httpClient.GetAsync($"{BaseUrl}estatisticas_admin.php");
+                if (resposta.IsSuccessStatusCode)
+                {
+                    string json = await resposta.Content.ReadAsStringAsync();
+                    return JsonSerializer.Deserialize<EstatisticasAdminResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao obter estatísticas: {ex.Message}");
+            }
+            return null;
+        }
 
         public async Task<List<UsuarioDto>> ObterTodosUsuariosAsync()
         {
@@ -197,11 +234,8 @@ namespace MonitorLotacaoApp.Services
                 if (resposta.IsSuccessStatusCode)
                 {
                     string json = await resposta.Content.ReadAsStringAsync();
-                    var lista = JsonSerializer.Deserialize<List<UsuarioDto>>(json, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-                    return lista ?? new List<UsuarioDto>();
+                    return JsonSerializer.Deserialize<List<UsuarioDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                           ?? new List<UsuarioDto>();
                 }
             }
             catch (Exception ex)
@@ -216,12 +250,12 @@ namespace MonitorLotacaoApp.Services
             try
             {
                 var parametros = new Dictionary<string, string>
-        {
-            { "idPassageiro", idPassageiro.ToString() },
-            { "nome", nome },
-            { "email", email },
-            { "tipo_usuario", tipoUsuario.ToString() }
-        };
+                {
+                    { "idPassageiro", idPassageiro.ToString() },
+                    { "nome", nome },
+                    { "email", email },
+                    { "tipo_usuario", tipoUsuario.ToString() }
+                };
                 var conteudo = new FormUrlEncodedContent(parametros);
                 var resposta = await _httpClient.PostAsync($"{BaseUrl}atualizar_usuario.php", conteudo);
 
@@ -244,9 +278,9 @@ namespace MonitorLotacaoApp.Services
             try
             {
                 var parametros = new Dictionary<string, string>
-        {
-            { "idPassageiro", idPassageiro.ToString() }
-        };
+                {
+                    { "idPassageiro", idPassageiro.ToString() }
+                };
                 var conteudo = new FormUrlEncodedContent(parametros);
                 var resposta = await _httpClient.PostAsync($"{BaseUrl}deletar_usuario.php", conteudo);
 
@@ -262,41 +296,6 @@ namespace MonitorLotacaoApp.Services
                 Console.WriteLine($"Erro ao deletar utilizador: {ex.Message}");
             }
             return false;
-        }
-
-        public class EstatisticasAdminResponse
-        {
-            public bool sucesso { get; set; }
-            public int totalRelatos { get; set; }
-            public List<HorarioCriticoDto> horariosCriticos { get; set; }
-        }
-
-        public class HorarioCriticoDto
-        {
-            public int hora { get; set; }
-            public int quantidade { get; set; }
-        }
-
-        // Adicione este método dentro da classe ApiService
-        public async Task<EstatisticasAdminResponse> ObterEstatisticasAsync()
-        {
-            try
-            {
-                var resposta = await _httpClient.GetAsync($"{BaseUrl}estatisticas_admin.php");
-                if (resposta.IsSuccessStatusCode)
-                {
-                    string json = await resposta.Content.ReadAsStringAsync();
-                    return JsonSerializer.Deserialize<EstatisticasAdminResponse>(json, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro ao obter estatísticas: {ex.Message}");
-            }
-            return null;
         }
     }
 }

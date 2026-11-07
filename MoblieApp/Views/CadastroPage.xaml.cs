@@ -48,7 +48,7 @@ public partial class CadastroPage : ContentPage
 
             if (cadastradoComSucesso)
             {
-                await DisplayAlert("Sucesso", "Conta cadastrada com sucesso no MySQL!", "OK");
+                await DisplayAlert("Sucesso", "Conta cadastrada com sucesso!", "OK");
 
                 TxtNome.Text = string.Empty;
                 TxtEmail.Text = string.Empty;
@@ -58,12 +58,12 @@ public partial class CadastroPage : ContentPage
             }
             else
             {
-                await DisplayAlert("Aviso do Servidor", "O servidor MySQL rejeitou o cadastro. O e-mail informado já pode estar em uso ou ocorreu uma falha na base central.", "OK");
+                await DisplayAlert("Aviso do Servidor", "O servidor rejeitou o cadastro. O e-mail informado já pode estar em uso ou ocorreu uma falha na base central.", "OK");
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Erro de Comunicação", $"Não foi possível ligar ao servidor MySQL. Detalhe: {ex.Message}", "OK");
+            await DisplayAlert("Erro de Comunicação", $"Não foi possível ligar ao servidor. Detalhe: {ex.Message}", "OK");
         }
     }
 

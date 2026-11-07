@@ -1,7 +1,7 @@
-﻿using System.Text.RegularExpressions;
-using MonitorLotacaoApp.Models;
+﻿using System;
+using System.Text.RegularExpressions;
+using Microsoft.Maui.Controls;
 using MonitorLotacaoApp.Services;
-using MonitorLotacaoApp.Views;
 
 namespace MonitorLotacaoApp.Views;
 
@@ -17,16 +17,17 @@ public partial class LoginPage : ContentPage
 
     private async void OnEntrarClicked(object sender, EventArgs e)
     {
-        // Higienização profunda: remove espaços em branco antes, depois e quaisquer espaços internos acidentais
-        string email = TxtEmail.Text?.Trim().Replace(" ", "") ?? string.Empty;
-        string senha = TxtSenha.Text ?? string.Empty;
+        string email = TxtEmail.Text?.Trim();
+        string senha = TxtSenha.Text;
 
+        // 1. Validação de campos vazios
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
         {
             await DisplayAlert("Atenção", "Por favor, preencha o e-mail e a senha para entrar.", "OK");
             return;
         }
 
+        // 2. Validação do formato do e-mail
         if (!ValidarFormatoEmail(email))
         {
             await DisplayAlert("Formato Inválido", "O e-mail digitado não possui um formato válido.", "OK");
@@ -35,72 +36,78 @@ public partial class LoginPage : ContentPage
 
         try
         {
-            // Validação com o serviço de API / Base de dados estruturada no TCC
-            LoginResponse resultado = await _apiService.RealizarLoginRealAsync(email, senha);
+            // 3. Autenticação real via API PHP / MySQL (ApiService)
+            var resultado = await _apiService.RealizarLoginRealAsync(email, senha);
 
             if (resultado != null && resultado.sucesso)
             {
+                // Armazena o ID e o nome do passageiro na sessão local para uso posterior nos relatos
+                Preferences.Set("idPassageiro", resultado.idPassageiro);
+                Preferences.Set("nomeUsuario", resultado.nome);
+
                 await DisplayAlert("Sucesso", $"Bem-vindo de volta, {resultado.nome}!", "OK");
 
-                int tipoUsuario = resultado.tipo_usuario ?? 0;
+                // Limpa os campos
+                TxtEmail.Text = string.Empty;
+                TxtSenha.Text = string.Empty;
 
-                // Redirecionamento correto conforme o perfil: Administrador (1) ou Passageiro (0)
-                if (tipoUsuario == 1)
-                {
-                    await Navigation.PushAsync(new AdminDashboardPage());
-                }
-                else
-                {
-                    await Navigation.PushAsync(new SelecionarLinhaPage());
-                }
+                // Direciona para a tela principal de seleção de linhas de ônibus
+                await Navigation.PushAsync(new SelecionarLinhaPage());
             }
             else
             {
-                string msgErro = resultado?.mensagem ?? "Credenciais inválidas ou utilizador não cadastrado.";
-                await DisplayAlert("Erro de Autenticação", msgErro, "OK");
+                string mensagemErro = resultado?.mensagem ?? "E-mail não cadastrado ou senha incorreta.";
+                await DisplayAlert("Erro de Autenticação", mensagemErro, "OK");
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Erro", $"Ocorreu um erro na conexão: {ex.Message}", "OK");
+            await DisplayAlert("Erro de Comunicação", $"Não foi possível conectar ao servidor: {ex.Message}", "OK");
         }
     }
 
-    private async void OnRedefinirSenhaClicked(object sender, EventArgs e)
-    {
-        string email = TxtEmail.Text?.Trim();
-
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            await DisplayAlert("Atenção", "Digite o seu e-mail no campo correspondente acima para iniciar a redefinição de senha.", "OK");
-            return;
-        }
-
-        string novaSenha = await DisplayPromptAsync("Redefinição de Senha", "Digite a sua nova senha (mínimo 6 caracteres):", "Confirmar", "Cancelar", keyboard: Keyboard.Text);
-
-        if (string.IsNullOrWhiteSpace(novaSenha) || novaSenha.Length < 6)
-        {
-            await DisplayAlert("Atenção", "A nova senha deve ter pelo menos 6 caracteres.", "OK");
-            return;
-        }
-
-        bool sucesso = await _apiService.RedefinirSenhaAsync(email, novaSenha);
-
-        if (sucesso)
-        {
-            await DisplayAlert("Sucesso", "Senha redefinida com sucesso!", "OK");
-            TxtSenha.Text = string.Empty;
-        }
-        else
-        {
-            await DisplayAlert("Erro", "Não foi possível redefinir a senha. Verifique se o e-mail está cadastrado.", "OK");
-        }
-    }
-
+    // Método exigido pelo botão do XAML para ir para a tela de cadastro
     private async void OnIrParaCadastroClicked(object sender, EventArgs e)
     {
-        // Navega para a tela dedicada de cadastro de passageiro
         await Navigation.PushAsync(new CadastroPage());
+    }
+
+    // Método exigido pelo botão do XAML para redefinição de senha
+    private async void OnRedefinirSenhaClicked(object sender, EventArgs e)
+    {
+        string emailRecuperacao = await DisplayPromptAsync("Recuperação de Senha", "Digite o seu e-mail cadastrado para redefinir a senha:", "Enviar", "Cancelar", keyboard: Keyboard.Email);
+
+        if (string.IsNullOrWhiteSpace(emailRecuperacao))
+            return;
+
+        if (!ValidarFormatoEmail(emailRecuperacao))
+        {
+            await DisplayAlert("Erro", "O e-mail informado não é válido.", "OK");
+            return;
+        }
+
+        string novaSenha = await DisplayPromptAsync("Nova Senha", "Digite a sua nova senha (mínimo 8 caracteres, com maiúscula, minúscula, número e caractere especial):", "Salvar", "Cancelar");
+
+        if (string.IsNullOrWhiteSpace(novaSenha))
+            return;
+
+        try
+        {
+            bool sucesso = await _apiService.RedefinirSenhaAsync(emailRecuperacao, novaSenha);
+
+            if (sucesso)
+            {
+                await DisplayAlert("Sucesso", "Senha redefinida com sucesso! Faça login com a nova senha.", "OK");
+            }
+            else
+            {
+                await DisplayAlert("Aviso", "Não foi possível redefinir a senha. Verifique se o e-mail está correto.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Erro", $"Falha na comunicação com o servidor: {ex.Message}", "OK");
+        }
     }
 
     private bool ValidarFormatoEmail(string email)
@@ -110,8 +117,8 @@ public partial class LoginPage : ContentPage
 
         try
         {
-            string padraoEmail = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-            return Regex.IsMatch(email, padraoEmail, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
+            string padrao = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            return Regex.IsMatch(email, padrao, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
         }
         catch (RegexMatchTimeoutException)
         {
