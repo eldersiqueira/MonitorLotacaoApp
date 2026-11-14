@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.Maui.Controls;
 using MonitorLotacaoApp.Services;
+using MonitorLotacaoApp.Views;
 
 namespace MonitorLotacaoApp.Views;
 
@@ -41,18 +42,28 @@ public partial class LoginPage : ContentPage
 
             if (resultado != null && resultado.sucesso)
             {
-                // Armazena o ID e o nome do passageiro na sessão local para uso posterior nos relatos
+                // Armazena as informações de sessão nas Preferences locais do dispositivo
                 Preferences.Set("idPassageiro", resultado.idPassageiro);
                 Preferences.Set("nomeUsuario", resultado.nome);
+                Preferences.Set("tipoUsuario", resultado.tipo_usuario ?? 0);
 
                 await DisplayAlert("Sucesso", $"Bem-vindo de volta, {resultado.nome}!", "OK");
 
-                // Limpa os campos
+                // Limpa os campos de input
                 TxtEmail.Text = string.Empty;
                 TxtSenha.Text = string.Empty;
 
-                // Direciona para a tela principal de seleção de linhas de ônibus
-                await Navigation.PushAsync(new SelecionarLinhaPage());
+                // --- ROTEAMENTO CONDICIONAL DE PERFIS (TCC) ---
+                if (resultado.tipo_usuario == 1)
+                {
+                    // Perfil Administrador: Abre o Painel Administrativo do Órgão de Transporte
+                    await Navigation.PushAsync(new AdminDashboardPage());
+                }
+                else
+                {
+                    // Perfil Passageiro: Abre a tela de seleção de linhas de ônibus
+                    await Navigation.PushAsync(new SelecionarLinhaPage());
+                }
             }
             else
             {
@@ -66,13 +77,11 @@ public partial class LoginPage : ContentPage
         }
     }
 
-    // Método exigido pelo botão do XAML para ir para a tela de cadastro
     private async void OnIrParaCadastroClicked(object sender, EventArgs e)
     {
         await Navigation.PushAsync(new CadastroPage());
     }
 
-    // Método exigido pelo botão do XAML para redefinição de senha
     private async void OnRedefinirSenhaClicked(object sender, EventArgs e)
     {
         string emailRecuperacao = await DisplayPromptAsync("Recuperação de Senha", "Digite o seu e-mail cadastrado para redefinir a senha:", "Enviar", "Cancelar", keyboard: Keyboard.Email);
@@ -86,7 +95,7 @@ public partial class LoginPage : ContentPage
             return;
         }
 
-        string novaSenha = await DisplayPromptAsync("Nova Senha", "Digite a sua nova senha (mínimo 8 caracteres, com maiúscula, minúscula, número e caractere especial):", "Salvar", "Cancelar");
+        string novaSenha = await DisplayPromptAsync("Nova Senha", "Digite a sua nova senha (mínimo 8 caracteres):", "Salvar", "Cancelar");
 
         if (string.IsNullOrWhiteSpace(novaSenha))
             return;
