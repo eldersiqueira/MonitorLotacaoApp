@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonitorLotacaoApp.Views.PassageiroHomePage"
+             Title="Painel do Passageiro - Monitor de Lotação">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="25">
+
+            <!-- Cabeçalho de Boas-Vindas -->
+            <Label Text="Bem-vindo, Passageiro!"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+
+            <Label Text="Selecione uma linha de ônibus abaixo para consultar ou reportar o nível de lotação em tempo real:"
+                   FontSize="14"
+                   TextColor="Gray"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center" />
+
+            <!-- Seleção de Linhas (Escopo de 5 Linhas Municipais) -->
+            <Picker x:Name="PickerLinhas" Title="Selecione a Linha de Ônibus">
+                <Picker.Items>
+                    <x:String>Linha 01 - Centro / Terminal Central</x:String>
+                    <x:String>Linha 02 - Vila Mogilar / Estudantes</x:String>
+                    <x:String>Linha 03 - Jundiapeba / Brás Cubas</x:String>
+                    <x:String>Linha 04 - Botujuru / Altaville</x:String>
+                    <x:String>Linha 05 - Cezar de Souza / Parque Industrial</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <!-- Botões de Ação Rápida (US 1.1 - Interface de Toque Único) -->
+            <Frame BorderColor="LightGray" CornerRadius="10" Padding="15">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Reportar Lotação Atual" FontSize="16" FontAttributes="Bold" />
+
+                    <Button Text="🟢 Vazio / Confortável" 
+                            BackgroundColor="#2ECC71" 
+                            TextColor="White"
+                            Clicked="OnReportarVazioClicked" />
+
+                    <Button Text="🟡 Moderado / Em Pé" 
+                            BackgroundColor="#F1C40F" 
+                            TextColor="White"
+                            Clicked="OnReportarModeradoClicked" />
+
+                    <Button Text="🔴 Lotado / Cheio" 
+                            BackgroundColor="#E74C3C" 
+                            TextColor="White"
+                            Clicked="OnReportarLotadoClicked" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Botão de Consulta de Histórico / Média (Módulo 2) -->
+            <Button Text="📊 Consultar Média de Lotação por Horário"
+                    BackgroundColor="#3498DB"
+                    TextColor="White"
+                    Clicked="OnConsultarHistoricoClicked" />
+
+            <!-- Botão Temporário para Alternar Perfil (Ajuda nos Testes) -->
+            <Button Text="🔄 Alternar para Perfil de Administrador (Teste)"
+                    BackgroundColor="#7F8C8D"
+                    TextColor="White"
+                    FontSize="12"
+                    Clicked="OnSwitchProfileClicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonitorLotacaoApp.Views.ReportarLotacaoPage"
+             Title="Reportar Lotação"
+             BackgroundColor="#2D3238">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="25" Spacing="15" VerticalOptions="Center">
+
+            <!-- Cabeçalho -->
+            <Label Text="Como está a lotação do ônibus agora?"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,5" />
+
+            <Label x:Name="LblNomeLinha"
+                   Text="Linha selecionada"
+                   FontSize="18"
+                   TextColor="#90CAF9"
+                   HorizontalTextAlignment="Center"
+                   FontAttributes="Bold"
+                   Margin="0,0,0,10"/>
+
+            <Label Text="Toque no nível que melhor descreve a situação a bordo:"
+                   FontSize="13"
+                   TextColor="#B0BEC5"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,10"/>
+
+            <!-- Bloco 1: Vazio -->
+            <VerticalStackLayout Spacing="4">
+                <Button Text=" Vazio "
+                        BackgroundColor="#2E7D32"
+                        TextColor="White"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        HeightRequest="55"
+                        CornerRadius="10"
+                        Clicked="OnVazioClicked" />
+                <Label Text="Com lugares disponíveis para sentar"
+                       FontSize="12"
+                       TextColor="#A5D6A7"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <!-- Bloco 2: Moderado -->
+            <VerticalStackLayout Spacing="4" Margin="0,5,0,0">
+                <Button Text=" Moderado "
+                        BackgroundColor="#EF6C00"
+                        TextColor="White"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        HeightRequest="55"
+                        CornerRadius="10"
+                        Clicked="OnModeradoClicked" />
+                <Label Text="Poucos lugares para sentar, com pessoas em pé"
+                       FontSize="12"
+                       TextColor="#FFE0B2"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <!-- Bloco 3: Lotado -->
+            <VerticalStackLayout Spacing="4" Margin="0,5,0,0">
+                <Button Text=" Lotado "
+                        BackgroundColor="#C62828"
+                        TextColor="White"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        HeightRequest="55"
+                        CornerRadius="10"
+                        Clicked="OnLotadoClicked" />
+                <Label Text="Sem lugares e com muitas pessoas em pé"
+                       FontSize="12"
+                       TextColor="#FFCDD2"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

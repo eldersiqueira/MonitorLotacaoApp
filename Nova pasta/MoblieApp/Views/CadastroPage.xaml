@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonitorLotacaoApp.Views.CadastroPage"
+             Title="Cadastro de Passageiro"
+             BackgroundColor="#2D3238">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="20" VerticalOptions="Center">
+
+            <Label Text="Criar Nova Conta"
+                   FontSize="26"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   HorizontalTextAlignment="Center" />
+
+            <Label Text="Cadastre-se para colaborar com o monitoramento"
+                   FontSize="14"
+                   TextColor="#B0BEC5"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,20"/>
+
+            <!-- Campo Nome Completo -->
+            <Entry x:Name="TxtNome"
+                   Placeholder="Nome completo"
+                   PlaceholderColor="#90A4AE"
+                   TextColor="White"
+                   BackgroundColor="#37474F"
+                   HeightRequest="50" />
+
+            <!-- Campo E-mail -->
+            <Entry x:Name="TxtEmail"
+                   Placeholder="E-mail"
+                   PlaceholderColor="#90A4AE"
+                   TextColor="White"
+                   BackgroundColor="#37474F"
+                   Keyboard="Email"
+                   HeightRequest="50" />
+
+            <!-- Campo Senha -->
+            <Entry x:Name="TxtSenha"
+                   Placeholder="Digite sua senha de acesso"
+                   PlaceholderColor="#90A4AE"
+                   TextColor="White"
+                   BackgroundColor="#37474F"
+                   IsPassword="True"
+                   HeightRequest="50" />
+
+            <!-- Instruções visuais dos requisitos da senha forte -->
+            <Label Text="A senha deve conter no mínimo 8 caracteres, incluindo letra maiúscula, minúscula, número e caractere especial (!@#$%^*)."
+                   FontSize="12"
+                   TextColor="#90A4AE"
+                   Margin="0,-10,0,10" />
+
+            <!-- Botão Cadastrar -->
+            <Button Text="Cadastrar Conta"
+                    BackgroundColor="#2E7D32"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    HeightRequest="50"
+                    CornerRadius="8"
+                    Clicked="OnCadastrarClicked" />
+
+            <!-- Botão Voltar -->
+            <Button Text="Já tem uma conta? Faça login"
+                    BackgroundColor="Transparent"
+                    TextColor="#90CAF9"
+                    FontSize="14"
+                    Clicked="OnVoltarLoginClicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

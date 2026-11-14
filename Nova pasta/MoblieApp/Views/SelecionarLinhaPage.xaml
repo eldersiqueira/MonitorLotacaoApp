@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonitorLotacaoApp.Views.SelecionarLinhaPage"
+             Title="Selecionar Linha de Ônibus"
+             BackgroundColor="#2D3238">
+
+    <VerticalStackLayout Padding="20" Spacing="15">
+
+        <Label Text="Escolha a sua linha"
+               FontSize="22"
+               FontAttributes="Bold"
+               TextColor="White"
+               HorizontalTextAlignment="Center" />
+
+        <Label Text="Selecione abaixo uma das 5 linhas monitoradas para prosseguir com o reporte de lotação."
+               FontSize="13"
+               TextColor="#B0BEC5"
+               HorizontalTextAlignment="Center"
+               Margin="0,0,0,10"/>
+
+        <!-- Lista das 5 Linhas Oficiais -->
+        <CollectionView x:Name="CollectionLinhas"
+                        SelectionMode="Single"
+                        SelectionChanged="OnLinhaSelectionChanged">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout Padding="15" BackgroundColor="#37474F" Spacing="4">
+                        <VerticalStackLayout.Margin>
+                            <OnPlatform x:TypeArguments="Thickness">
+                                <On Platform="iOS, Android" Value="0,5,0,5"/>
+                                <On Platform="WinUI" Value="0,2,0,2"/>
+                            </OnPlatform>
+                        </VerticalStackLayout.Margin>
+
+                        <!-- Nome da Linha com Fonte Aumentada e Negrito -->
+                        <Label Text="{Binding NomeLinha}"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#90CAF9" />
+
+                        <!-- Trajeto / Descrição -->
+                        <Label Text="{Binding Trajeto}"
+                               FontSize="13"
+                               TextColor="#CFD8DC" />
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </VerticalStackLayout>
+</ContentPage>

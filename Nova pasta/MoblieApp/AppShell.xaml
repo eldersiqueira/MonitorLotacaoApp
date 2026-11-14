@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="MonitorLotacaoApp.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:MonitorLotacaoApp.Views"
+    Title="Monitor de Lotação"
+    FlyoutBehavior="Disabled">
+    <!-- Isso DESATIVA o menu hambúrguer completamente -->
+
+    <!-- A única tela que nasce com o aplicativo é o Login -->
+    <ShellContent
+        Title="Login"
+        ContentTemplate="{DataTemplate views:LoginPage}"
+        Route="LoginPage" />
+
+</Shell>

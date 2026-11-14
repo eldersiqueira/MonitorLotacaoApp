@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MonitorLotacaoApp.Views.AdminGerenciarUsuariosPage"
+             Title="Gestão de Acessos">
+
+    <!-- ScrollView global para permitir rolagem nativa em telas menores e exibir todos os registros -->
+    <ScrollView>
+        <VerticalStackLayout Padding="15" Spacing="10">
+
+            <Label Text="Lista de Utilizadores e Perfis"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="#0056b3"
+                   HorizontalOptions="Center"
+                   Margin="0,5,0,10"/>
+
+            <!-- CollectionView com o x:Name correto (CvUsuarios) correspondendo à linha 29 -->
+            <CollectionView x:Name="CvUsuarios" 
+                            HorizontalOptions="Fill"
+                            ItemsLayout="VerticalList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Stroke="#E0E0E0" 
+                                StrokeThickness="1" 
+                                StrokeShape="RoundRectangle 12" 
+                                BackgroundColor="White" 
+                                Padding="15" 
+                                Margin="0,0,0,10"
+                                HorizontalOptions="Fill">
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="{Binding nome}" FontSize="18" FontAttributes="Bold" TextColor="#333333"/>
+                                <Label Text="{Binding email}" FontSize="14" TextColor="#666666"/>
+                                <Label Text="{Binding tipo_usuario, StringFormat='Tipo de Perfil: {0}'}" FontSize="13" TextColor="#0056b3"/>
+
+                                <HorizontalStackLayout Spacing="10" Margin="0,8,0,0">
+                                    <Button Text="Editar" 
+                                            BackgroundColor="#f0ad4e" 
+                                            TextColor="White" 
+                                            HeightRequest="40"
+                                            Clicked="OnEditarClicked" 
+                                            CommandParameter="{Binding .}"/>
+                                    <Button Text="Excluir" 
+                                            BackgroundColor="#d9534f" 
+                                            TextColor="White" 
+                                            HeightRequest="40"
+                                            Clicked="OnExcluirClicked" 
+                                            CommandParameter="{Binding .}"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
